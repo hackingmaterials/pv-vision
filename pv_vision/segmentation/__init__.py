@@ -1,0 +1,1 @@
+from .SolarClass import SolarImage
