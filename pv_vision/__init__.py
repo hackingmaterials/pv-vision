@@ -1,1 +1,1 @@
-from pv_vision.segmentation import SolarClass
+from pv_vision.segmentation import solar_class

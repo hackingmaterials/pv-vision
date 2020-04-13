@@ -1,1 +1,1 @@
-from .SolarClass import SolarImage
+from .solar_class import SolarImage

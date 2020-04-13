@@ -14,7 +14,7 @@ import argparse
 import random
 import cv2
 import os
-from LenetModel import LeNet
+from lenet_model import LeNet
 
 
 """
