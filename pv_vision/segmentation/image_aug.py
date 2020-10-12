@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def lightnessBalance(src, threshold=[1, 99], extend=[0.1, 0.9]):
+def lightness_balance(src, threshold=[1, 99], extend=[0.1, 0.9]):
     # compute the lightness of source image
     hsv_image = cv.cvtColor(src, cv.COLOR_BGR2HSV)
     lightness = hsv_image[:, :, 2].mean()
@@ -24,7 +24,7 @@ def lightnessBalance(src, threshold=[1, 99], extend=[0.1, 0.9]):
     return out
 
 
-def edgeRemove(im_src, threshold=0.2878, displace=3, size=400):
+def edge_remove(im_src, threshold=0.2878, displace=3, size=400):
     # find the edge, here only find horizontal edge
     image = im_src / np.max(im_src)
     image_mask = image > threshold
