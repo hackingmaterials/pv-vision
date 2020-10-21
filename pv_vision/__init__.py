@@ -1,2 +1,3 @@
 from pv_vision.segmentation import solar_class
 from pv_vision.segmentation_CNN_beta import seg_cnn
+from pv_vision.feature_extraction import feature_extraction
