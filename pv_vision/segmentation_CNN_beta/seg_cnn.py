@@ -21,6 +21,8 @@ def load_mask(path, image):
     code = data["objects"][0]["bitmap"]["data"]
     origin = data["objects"][0]["bitmap"]["origin"]
     mask = base64_2_mask(code)
+    mask_center = np.array([mask.shape[1]/2, mask.shape[0]/2])
+    mask_center += origin
 
     up = np.zeros((origin[1], mask.shape[1]))
     mask2 = np.vstack((up, mask))
@@ -31,13 +33,13 @@ def load_mask(path, image):
     right = np.zeros((mask4.shape[0], image.shape[1] - mask4.shape[1]))
     mask5 = np.hstack((mask4, right))
 
-    return mask5.astype('uint8')
+    return mask5.astype('uint8'), mask_center.astype(int)
 
 
 def find_cross(part, houghlinePara=50):
     edge = cv.Canny(part, 0, 1)
     lines = cv.HoughLines(edge, 1, np.pi / 180, houghlinePara)
-    
+
     rhos = []
     thetas = []
     for line in lines:
@@ -78,27 +80,32 @@ def find_cross(part, houghlinePara=50):
     return x_cross, y_cross
 
 
-def find_module_corner(mask, dist=200, displace=0, method=0):
+def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
+                       corner_center=False, center_displace=10):
 
-    corners = cv.goodFeaturesToTrack(mask, 4, 0.01, 200, blockSize=9)
-    corners = np.int0(corners)
-    xs1 = []
-    ys1 = []
-    for i in corners:
-        x, y = i.ravel()
-        xs1.append(x)
-        ys1.append(y)
-    x_m = int(np.mean(xs1))
-    y_m = int(np.mean(ys1))
-    A = mask[0:y_m+50, 0:x_m+50]
-    B = mask[0:y_m+50, x_m-50:]
-    C = mask[y_m-50:, 0:x_m+50]
-    D = mask[y_m-50:, x_m-50:]
+    x_m = mask_center[0]
+    y_m = mask_center[1]
+
+    if corner_center:
+        corners = cv.goodFeaturesToTrack(mask, 4, 0.01, 200, blockSize=9)
+        corners = np.int0(corners)
+        xs1 = []
+        ys1 = []
+        for i in corners:
+            x, y = i.ravel()
+            xs1.append(x)
+            ys1.append(y)
+        x_m = int(np.mean(xs1))
+        y_m = int(np.mean(ys1))
+
+    A = mask[0:y_m+center_displace, 0:x_m+center_displace]
+    B = mask[0:y_m+center_displace, x_m-center_displace:]
+    C = mask[y_m-center_displace:, 0:x_m+center_displace]
+    D = mask[y_m-center_displace:, x_m-center_displace:]
 
     xs = []
     ys = []
     if method == 0:
-    
         corners_A = cv.goodFeaturesToTrack(A, 1, 0.01, dist, blockSize=9)
         corners_A = np.int0(corners_A)
         corners_B = cv.goodFeaturesToTrack(B, 1, 0.01, dist, blockSize=9)
@@ -115,40 +122,32 @@ def find_module_corner(mask, dist=200, displace=0, method=0):
                 ys.append(y)
 
     if method == 1:
-        for part in [A,B,C,D]:
+        for part in [A, B, C, D]:
             x_cross, y_cross = find_cross(part)
             xs.append(x_cross)
             ys.append(y_cross)
 
     # sort out the corners    
-    xs[1] += x_m - 50
-    ys[2] += y_m - 50
-    xs[3] += x_m - 50
-    ys[3] += y_m - 50
+    xs[1] += x_m-center_displace
+    ys[2] += y_m-center_displace
+    xs[3] += x_m-center_displace
+    ys[3] += y_m-center_displace
 
-    xs = np.array(xs)
-    ys = np.array(ys)
-    x_avg = np.average(xs)
-    y_avg = np.average(ys)
+    xs[0] -= displace
+    ys[0] -= displace
 
-    corners_order = []
-    for y_coeff in [-1, 1]:
-        for x_coeff in [-1, 1]:
-            if y_coeff == -1:
-                y_comp = (ys < y_avg)
-            else:
-                y_comp = (ys > y_avg)
-            if x_coeff == -1:
-                x_comp = (xs < x_avg)
-            else:
-                x_comp = (xs > x_avg)
+    xs[1] += displace
+    ys[1] -= displace
 
-            x_inx = np.argwhere(x_comp)
-            y_inx = np.argwhere(y_comp)
-            corners_order.append((xs[int(np.intersect1d(x_inx, y_inx))] + x_coeff * displace,
-                                  ys[int(np.intersect1d(x_inx, y_inx))] + y_coeff * displace))
+    xs[2] -= displace
+    ys[2] += displace
 
-    return corners_order
+    xs[3] += displace
+    ys[3] += displace
+
+    corners_order = list(zip(xs, ys))
+
+    return np.array(corners_order)
 
 
 def perspective_transform(image, src, sizex, sizey):
@@ -161,16 +160,16 @@ def perspective_transform(image, src, sizex, sizey):
     return warped
 
 
-def find_cell_corner(wrap):
+def find_cell_corner(wrap, dist=25):
     wrap_g = cv.cvtColor(wrap, cv.COLOR_BGR2GRAY)
 
     sum_x = np.sum(wrap_g, axis=0)
     sum_x = sum_x / np.max(sum_x)
-    peak_x, _ = signal.find_peaks(-sum_x, prominence=0.12)
+    peak_x, _ = signal.find_peaks(-sum_x, distance=dist, prominence=0.08)
 
     sum_y = np.sum(wrap_g, axis=1)
     sum_y = sum_y / np.max(sum_y)
-    peak_y, _ = signal.find_peaks(-sum_y, prominence=0.12)
+    peak_y, _ = signal.find_peaks(-sum_y, distance=dist, prominence=0.08)
 
     return peak_x, peak_y
 
@@ -184,7 +183,8 @@ def find_corner_mean(wrap, x, y, displace=7):
 
         xs = [x_l, x_r, x_l, x_r]
         ys = [y_u, y_u, y_d, y_d]
-        crop = perspective_transform(wrap, list(zip(xs,ys)), displace*2, displace*2)
+        crop = perspective_transform(wrap, list(zip(xs, ys)), 
+                                     displace*2, displace*2)
         crop_g = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
 
         corners = cv.goodFeaturesToTrack(crop_g, 4, 0.01, 1)
