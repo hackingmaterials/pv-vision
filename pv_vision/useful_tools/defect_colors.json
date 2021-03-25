@@ -1,0 +1,4 @@
+{"crack_bbox_yolo": [60, 124, 90], 
+ "solder_bbox_yolo": [190, 112, 78], 
+ "oxygen_bbox_yolo": [40, 64, 183], 
+ "intra_bbox_yolo": [103, 52, 154]}

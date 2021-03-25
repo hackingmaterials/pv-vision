@@ -42,7 +42,7 @@ for file in tqdm(ann_files):
         with open("cell_issues.csv", 'a') as f2:
             f2.write(','.join(content))
         
-    elif (crack > 1 or oxygen > 0 or solder > 0) and intra == 0:
+    elif (crack > 1 or oxygen > 0 or solder > 0 or intra > 0) and intra == 0:
         content = [name, 'category2', 'crack', str(crack),
                    'oxygen', str(oxygen), 'solder', str(solder),
                    'intra', str(intra), '\n']
