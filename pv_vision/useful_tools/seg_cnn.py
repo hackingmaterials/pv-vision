@@ -22,7 +22,7 @@ def load_mask(path, image, mask_name='module_unet'):
         origin = data["objects"][0]["bitmap"]["origin"]
     else:
         for obj in data["objects"]:
-            if obj['ClassTitle'] == mask_name:
+            if obj['classTitle'] == mask_name:
                 code = obj["bitmap"]["data"]
                 origin = obj["bitmap"]["origin"]
     mask = base64_2_mask(code)
