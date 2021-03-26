@@ -14,12 +14,17 @@ def base64_2_mask(s):
    return mask
 
 
-def load_mask(path, image):
+def load_mask(path, image, mask_name='module_unet'):
     with open(path, 'r') as file:
         data = json.load(file)
-
-    code = data["objects"][0]["bitmap"]["data"]
-    origin = data["objects"][0]["bitmap"]["origin"]
+    if len(data["objects"]) == 1: 
+        code = data["objects"][0]["bitmap"]["data"]
+        origin = data["objects"][0]["bitmap"]["origin"]
+    else:
+        for obj in data["objects"]:
+            if obj['ClassTitle'] == mask_name:
+                code = obj["bitmap"]["data"]
+                origin = obj["bitmap"]["origin"]
     mask = base64_2_mask(code)
     mask_center = np.array([mask.shape[1]/2, mask.shape[0]/2])
     mask_center += origin

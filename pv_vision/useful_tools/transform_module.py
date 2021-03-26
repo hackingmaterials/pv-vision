@@ -19,6 +19,8 @@ parser.add_argument('-a', '--ann', type=str,
                     help='ann or ann folder, path separated with /')
 parser.add_argument('-o', '--output', type=str,
                     help='the name or dir of output')
+parser.add_argument('-n', '--mask_name', type=str, default='module_unet',
+                    help='the name of the mask')
 parser.add_argument('-m', '--method', type=int, choices=[0, 1], default=0,
                     help='transform method. 0-corner_detection,\
                     1-line_detection')
@@ -26,12 +28,13 @@ args = parser.parse_args()
 
 arg_im = Path(args.image)
 arg_ann = Path(args.ann)
+arg_mask_name = args.mask_name
 
 if os.path.isfile(arg_im):
     file_name = os.path.split(arg_ann)[-1]
     name = file_name.split('.')[0]
     image = cv.imread(str(arg_im))
-    mask, mask_center = seg.load_mask(arg_ann, image)
+    mask, mask_center = seg.load_mask(arg_ann, image, arg_mask_name)
     corners = seg.find_module_corner(mask, mask_center, method=args.method,
                                      displace=3, corner_center=True,
                                      center_displace=70)
@@ -68,7 +71,7 @@ elif os.path.isdir(arg_im):
             ann_path = arg_ann/ann_file
             image = cv.imread(str(arg_im/(name+im_type)))
 
-            mask, mask_center = seg.load_mask(ann_path, image)
+            mask, mask_center = seg.load_mask(ann_path, image, arg_mask_name)
             corners = seg.find_module_corner(mask, mask_center, method=0, displace=3)
             wrap = seg.perspective_transform(image, corners, 600, 300)
             peak_x, peak_y = seg.find_cell_corner(wrap)
