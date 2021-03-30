@@ -157,7 +157,10 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
 
 def perspective_transform(image, src, sizex, sizey):
     src = np.float32(src)
-    dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
+    if np.sum((src[0] - src[2])**2) <= np.sum((src[0] - src[1])**2):
+        dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
+    else:
+        dst = np.float32([(0, sizey), (0, 0), (sizex, sizey), (sizex, 0)])
     M = cv.getPerspectiveTransform(src, dst)
 
     warped = cv.warpPerspective(image, M, (sizex, sizey))
