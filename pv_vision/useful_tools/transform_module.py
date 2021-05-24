@@ -19,6 +19,10 @@ parser.add_argument('-a', '--ann', type=str,
                     help='ann or ann folder, path separated with /')
 parser.add_argument('-o', '--output', type=str,
                     help='the name or dir of output')
+parser.add_argument('-l', '--length', type=int, default=16,
+                    help='the number of cells on long edge')
+parser.add_argument('-w', '--width', type=int, default=8,
+                    help='the number of cells on short edge')
 parser.add_argument('-n', '--mask_name', type=str, default='module_unet',
                     help='the name of the mask')
 parser.add_argument('-m', '--method', type=int, choices=[0, 1], default=0,
@@ -75,27 +79,27 @@ elif os.path.isdir(arg_im):
             corners = seg.find_module_corner(mask, mask_center, method=0, displace=3)
             wrap = seg.perspective_transform(image, corners, 600, 300)
             peak_x, peak_y = seg.find_cell_corner(wrap)
-            if len(peak_x) > 12 and len(peak_y) > 5:
+            if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
                 cv.imwrite(str(store_dir/(name+'.png')), wrap)
             else:
                 corners = seg.find_module_corner(mask, mask_center, method=1, displace=3)
                 wrap = seg.perspective_transform(image, corners, 600, 300)
                 peak_x, peak_y = seg.find_cell_corner(wrap)
-                if len(peak_x) > 12 and len(peak_y) > 5:
+                if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
                     cv.imwrite(str(store_dir/(name+'.png')), wrap)
                 else:
                     corners = seg.find_module_corner(mask, mask_center, method=0,
                                                      displace=3, corner_center=True, center_displace=50)
                     wrap = seg.perspective_transform(image, corners, 600, 300)
                     peak_x, peak_y = seg.find_cell_corner(wrap)
-                    if len(peak_x) > 12 and len(peak_y) > 5:
+                    if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
                         cv.imwrite(str(store_dir/(name+'.png')), wrap)
                     else:
                         corners = seg.find_module_corner(mask, mask_center, method=1,
                                                          displace=3, corner_center=True, center_displace=50)
                         wrap = seg.perspective_transform(image, corners, 600, 300)
                         peak_x, peak_y = seg.find_cell_corner(wrap)
-                        if len(peak_x) > 12 and len(peak_y) > 5:
+                        if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
                             cv.imwrite(str(store_dir/(name+'.png')), wrap)
                         else:
                             N_err += 1
