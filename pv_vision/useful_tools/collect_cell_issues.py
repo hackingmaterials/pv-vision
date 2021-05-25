@@ -6,12 +6,25 @@ from pathlib import Path
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
-parser.add_argument('ann', type=str,
+parser.add_argument('-a', '--ann', type=str,
                     help='input ann folder, path separated with /')
+parser.add_argument('-n', '--name', type=str, default=None,
+                    help='json file which contains the name of defects')
 args = parser.parse_args()
 
 ann_dir = Path(args.ann)
 ann_files = os.listdir(ann_dir)
+
+if args.name:
+    with open(args.name, 'r') as f:
+        defect_name = json.load(f)
+else:
+    defect_name = {
+        "crack": "crack_bbox_yolo",
+        "oxygen": "oxygen_bbox_yolo",
+        "intra": "intra_bbox_yolo",
+        "solder": "solder_bbox_yolo"
+    }
 
 for file in tqdm(ann_files):
     name = file.split('.')[0]
@@ -25,13 +38,13 @@ for file in tqdm(ann_files):
     solder = 0
 
     for defect in data["objects"]:
-        if defect["classTitle"] == "crack_bbox_yolo":
+        if defect["classTitle"] == defect_name['crack']:
             crack += 1
-        elif defect["classTitle"] == "oxygen_bbox_yolo":
+        elif defect["classTitle"] == defect_name['oxygen']:
             oxygen += 1
-        elif defect["classTitle"] == "intra_bbox_yolo":
+        elif defect["classTitle"] == defect_name['intra']:
             intra += 1
-        elif defect["classTitle"] == "solder_bbox_yolo":
+        elif defect["classTitle"] == defect_name['solder']:
             solder += 1
     
 
