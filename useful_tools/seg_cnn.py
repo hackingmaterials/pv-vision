@@ -260,3 +260,59 @@ def crop_cell(wrap, peak_x, peak_y, saveplace, plot_bool=0, data_bool=0):
             #n += 1
     if data_bool:
         return np.array(data)
+
+
+# a new version of finding the module corners
+def fill_polygon(points, im_shape):
+    im_cnt = np.zeros((im_shape[0],im_shape[1],1), np.uint8)
+    cv.fillPoly(im_cnt, [points], (255,255))
+
+    return im_cnt
+
+
+def sort_corners(corners):
+    col_sorted = corners[np.argsort(corners[:,1])]
+    a = np.argsort(col_sorted[:2, 0])
+    b = np.argsort(col_sorted[2:, 0]) + 2
+
+    return col_sorted[np.hstack((a, b))]
+
+
+def find_corners(im, n_corners=4, dist_corners=100, displace=3):
+    corners_unravel = cv.goodFeaturesToTrack(im, n_corners, 0.01, dist_corners, blockSize=9),
+    corners = []
+    for corner in corners_unravel[0]:
+        corners.append(list(corner.ravel()))
+    corners_sorted = sort_corners(np.array(corners))
+    corners_displaced = np.array([[-1, -1], [1, -1], [-1, 1], [1, 1]]) * displace + corners_sorted
+
+    return corners_displaced
+
+def find_module_corner2(mask, mode=0):
+    """
+    mode == 0: detect corners of the convex of module
+    mode == 1: detect corners of the approximated convex of module
+    mode == 2: detect corners of the approximated contour of the module
+    mode == 3: detect corners of the blurred mask of the module
+    """
+    blur = cv.blur(mask, (6,6))
+    contours, _ = cv.findContours(blur, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    cnt_approx = cv.approxPolyDP(contours[0], 8, True)
+    convex = cv.convexHull(contours[0])
+    conv_approx = cv.approxPolyDP(convex, 8, True)
+
+    if mode == 0:
+        im_conv = fill_polygon(convex, blur.shape)
+        corners = find_corners(im_conv)
+    elif mode == 1:
+        im_conv_app = fill_polygon(conv_approx, blur.shape)
+        corners = find_corners(im_conv_app)
+    elif mode == 2:
+        im_cnt_app = fill_polygon(cnt_approx, blur.shape)
+        corners = find_corners(im_cnt_app)
+    elif mode == 3:
+        corners = find_corners(blur)
+    else:
+        print("mode must be one of 0, 1, 2")
+        return
+    return corners
