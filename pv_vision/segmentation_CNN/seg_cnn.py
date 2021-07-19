@@ -1,23 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-import zlib
-import base64
+import zlib, base64
 from scipy import signal
 import os
 import json
 
-from scipy.signal import find_peaks
-from scipy.optimize import curve_fit
-
-### This part is used to do perspective transform ###
-
 
 def base64_2_mask(s):
-    z = zlib.decompress(base64.b64decode(s))
-    n = np.fromstring(z, np.uint8)
-    mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
-    return mask
+   z = zlib.decompress(base64.b64decode(s))
+   n = np.fromstring(z, np.uint8)
+   mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
+   return mask
 
 
 def load_mask(path, image, mask_name='module_unet'):
@@ -138,7 +132,7 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
             xs.append(x_cross)
             ys.append(y_cross)
 
-    # sort out the corners
+    # sort out the corners    
     xs[1] += x_m-center_displace
     ys[2] += y_m-center_displace
     xs[3] += x_m-center_displace
@@ -221,8 +215,7 @@ def find_corner_mean(wrap, x, y, displace=7):
         return x_mean, y_mean
 
 
-# old version, not used
-def crop_cell(wrap, peak_x, peak_y, saveplace, plot_bool=0, data_bool=0):  
+def crop_cell(wrap, peak_x, peak_y, saveplace, plot_bool=0, data_bool=0):
     if plot_bool:
         plt.imshow(cv.cvtColor(wrap, cv.COLOR_BGR2RGB))
 
@@ -264,197 +257,62 @@ def crop_cell(wrap, peak_x, peak_y, saveplace, plot_bool=0, data_bool=0):
 
             crop = perspective_transform(wrap, list(zip(xs, ys)), 64, 64)
             cv.imwrite(saveplace+str(i) + "_" + str(j) + ".png", crop)
-            # n += 1
+            #n += 1
     if data_bool:
         return np.array(data)
 
 
-### this part is used to crop out the single cells ###
+# a new version of finding the module corners
+def fill_polygon(points, im_shape):
+    im_cnt = np.zeros((im_shape[0],im_shape[1],1), np.uint8)
+    cv.fillPoly(im_cnt, [points], (255,255))
+
+    return im_cnt
 
 
-def linear(x, a, b):
-    return a * x + b
+def sort_corners(corners):
+    col_sorted = corners[np.argsort(corners[:,1])]
+    a = np.argsort(col_sorted[:2, 0])
+    b = np.argsort(col_sorted[2:, 0]) + 2
+
+    return col_sorted[np.hstack((a, b))]
 
 
-def linear_regression(inxes, lines):
-    ab_s = []
+def find_corners(im, n_corners=4, dist_corners=100, displace=3):
+    corners_unravel = cv.goodFeaturesToTrack(im, n_corners, 0.01, dist_corners, blockSize=9),
+    corners = []
+    for corner in corners_unravel[0]:
+        corners.append(list(corner.ravel()))
+    corners_sorted = sort_corners(np.array(corners))
+    corners_displaced = np.array([[-1, -1], [1, -1], [-1, 1], [1, 1]]) * displace + corners_sorted
 
-    for line in lines:
-        ab, _ = curve_fit(linear, inxes, line)
-        #line_fit = ab[0]*inxes+ab[1]
-        ab_s.append(ab)
+    return corners_displaced
 
-    ab_s = np.array(ab_s)
+def find_module_corner2(mask, mode=0):
+    """
+    mode == 0: detect corners of the convex of module
+    mode == 1: detect corners of the approximated convex of module
+    mode == 2: detect corners of the approximated contour of the module
+    mode == 3: detect corners of the blurred mask of the module
+    """
+    blur = cv.blur(mask, (6,6))
+    contours, _ = cv.findContours(blur, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    cnt_approx = cv.approxPolyDP(contours[0], 8, True)
+    convex = cv.convexHull(contours[0])
+    conv_approx = cv.approxPolyDP(convex, 8, True)
 
-    return ab_s
-
-
-def filter_margin(edges, im_length):
-    if edges[0] < 20:
-        edges = np.delete(edges, 0)
-    if edges[-1] > (im_length - 20):
-        edges = np.delete(edges, -1)
-
-    return edges
-
-
-def detect_edge(image, peaks_on=0, cell_size=30, split_size=10,
-                im_size=[300, 600], row_col=[8, 16]):
-    # 0: x, 1: y
-    image_g = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    
-    if peaks_on == 0:
-        splits = np.vsplit(image_g, image_g.shape[0]/split_size)
-        
-    elif peaks_on == 1:
-        splits = np.hsplit(image_g, image_g.shape[1]/split_size)
-        
+    if mode == 0:
+        im_conv = fill_polygon(convex, blur.shape)
+        corners = find_corners(im_conv)
+    elif mode == 1:
+        im_conv_app = fill_polygon(conv_approx, blur.shape)
+        corners = find_corners(im_conv_app)
+    elif mode == 2:
+        im_cnt_app = fill_polygon(cnt_approx, blur.shape)
+        corners = find_corners(im_cnt_app)
+    elif mode == 3:
+        corners = find_corners(blur)
     else:
-        print('peaks_on must be 0 or 1')
+        print("mode must be one of 0, 1, 2")
         return
-    
-    peaklist = []
-    splits_inx = []
-
-    # peaks when suming the whole image
-    sum_whole = np.sum(image_g, axis=peaks_on)
-    sum_whole = sum_whole/sum_whole.max()
-    peaks_whole, _ = find_peaks(-sum_whole, distance=cell_size)
-    peaks_whole = filter_margin(peaks_whole, im_length=im_size[peaks_on-1])
-
-    flag = False
-    for inx, split in enumerate(splits):
-    
-        sum_split = np.sum(split, axis=peaks_on)
-        sum_split = sum_split/sum_split.max()
-        peaks_split, _ = find_peaks(-sum_split, distance=cell_size)
-        peaks_split = filter_margin(peaks_split, im_length=im_size[peaks_on-1])
-
-        splits_inx.append(int(split_size * (inx + 1/2)))
-        if len(peaks_split) == row_col[peaks_on-1] - 1:
-            peaklist.append(peaks_split)
-        elif (len(peaks_split) != row_col[peaks_on-1] - 1) and inx != 0: 
-            peaklist.append(peaklist[inx-1])
-        elif len(peaks_split) == row_col[peaks_on-1] - 1:
-            peaklist.append(peaks_whole)
-        else:
-            peaklist.append('nan')
-            flag = True
-            
-    # use any other splits to represent split[0, 1, 2...] if peaklist[0] fails  
-    if flag:
-        peaklist = np.array(peaklist)
-        nan = np.argwhere(peaklist == 'nan')
-        n_nan = np.argwhere(peaklist != 'nan')
-        for i in nan:
-            peaklist[int(i)] = peaklist[int(n_nan[0])]
-        peaklist = list(peaklist)
-
-    edgelist = np.array(list(zip(*peaklist)))
-    edgelist_c = np.copy(edgelist)
-
-    if len(peaks_whole) == row_col[peaks_on-1] - 1: 
-        for i, edge in enumerate(edgelist_c):
-            for j, sub_edge in enumerate(edge):
-                if np.abs(sub_edge - peaks_whole[i]) > 10:
-                    edgelist_c[i][j] = peaks_whole[i]
-
-    return np.array(splits_inx), edgelist_c
-
-
-def displace(line_ab, displacement):
-    c = displacement * np.sqrt((1+line_ab[0]**2))
-
-    return (line_ab[0], line_ab[1] + c)
-
-
-def couple_edges(lines_ab, length, displacement=0, add_edge=True):  
-    # The first line in the tuple moves to negative direction, 
-    # the second to positive direction
-    lines_copy = np.copy(lines_ab)
-    if add_edge:
-        lines_copy = np.insert(lines_copy, 0, [0,0], axis=0)
-        lines_copy = np.insert(lines_copy, len(lines_copy), [0,length-1], axis=0)
-    lines_l = np.delete(lines_copy, -1, 0)
-    lines_r = np.delete(lines_copy, 0, 0)
-    lines_couple = np.array(list(zip(lines_l, lines_r)))
-
-    lines_couple_new = []
-    for couple in lines_couple:
-        minus = displace(couple[0], -displacement)
-        plus = displace(couple[1], displacement)
-        lines_couple_new.append((minus, plus))
-
-    return np.array(lines_couple_new)
-
-
-def cross(vline, hline):
-    x = (vline[0]*hline[1]+vline[1]) / (1-vline[0]*hline[0])
-    y = (hline[0]*vline[1]+hline[1]) / (1-vline[0]*hline[0])
-
-    return (x, y)
-
-
-def perspective_transform_cell(image, src, size):
-    src = np.float32(src)
-    dst = np.float32([(0, 0), (size, 0), (0, size), (size, size)])
-    M = cv.getPerspectiveTransform(src, dst)
-    
-    warped = cv.warpPerspective(image, M, (size, size))
-    
-    return warped
-
-
-def segment_cell(image, abs_x_couple, abs_y_couple, saveplace=None, save=False, cellsize=32):
-
-    cells = []
-    for i, hline_ab in enumerate(abs_y_couple):
-        for j, vline_ab in enumerate(abs_x_couple):
-            xy = []
-            for hab in hline_ab:
-                for vab in vline_ab:
-                    xy.append(cross(vab, hab))
-            
-            warped = perspective_transform(image, xy, cellsize)
-            cells.append(warped)
-
-            #counter += 1
-
-            if save:
-                cv.imwrite(str(saveplace/(str(i)+str(j)+'.jpg')), warped)
-            
-    return cells
-
-
-def coordinate2inx(coordinate, row=8, col=16, im_shape=[300, 600]):
-    inx = col * round(coordinate[1] / (im_shape[0] / row)) + round(coordinate[0] / (im_shape[1] / col))
-
-    return inx
-
-
-def classify_cells(ann_path, defects_inx_dic, row_col=[8, 16], shape=[300, 600]):
-    with open(ann_path, 'r') as file:
-        data = json.load(file)
-    if len(data['objects']) > 0:
-        for obj in data['objects']:
-            classTitle = obj['classTitle']
-            points = obj['points']['exterior'][0]
-            inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
-            defects_inx_dic[classTitle].append(inx)
-    
-    return defects_inx_dic
-
-
-def write_cells(single_cells, defects_inx):
-
-    for inx, cell in enumerate(single_cells):
-        if inx in defects_inx['crack_bbox']:
-            cv.imwrite('classified_cells/crack/'+name+'__'+str(inx)+'.png', cell)
-        elif inx in defects_inx['solder_bbox']:
-            cv.imwrite('classified_cells/solder/'+name+'__'+str(inx)+'.png', cell)
-        elif inx in defects_inx['oxygen_bbox']:
-            cv.imwrite('classified_cells/oxygen/'+name+'__'+str(inx)+'.png', cell)
-        elif inx in defects_inx['intra_bbox']:
-            cv.imwrite('classified_cells/intra/'+name+'__'+str(inx)+'.png', cell)
-        else:
-            cv.imwrite('classified_cells/intact/'+name+'__'+str(inx)+'.png', cell)
+    return corners

@@ -81,17 +81,7 @@ elif os.path.isdir(arg_im):
             mask, mask_center = seg.load_mask(ann_path, image, arg_mask_name)
 
             flag = True
-            for i in [0, 1, 2, 3]:
-                corners = seg.find_module_corner2(mask, mode=i)
-                wrap = seg.perspective_transform(image, corners, int(37.5*args.length), int(37.5*args.width))
-                peak_x, peak_y = seg.find_cell_corner(wrap)
-                if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
-                    cv.imwrite(str(store_dir/(name+'.png')), wrap)
-                    flag = False
-                    break
-                else:
-                    pass
-            if flag:
+            try:
                 for i in [0, 1]:
                     corners = seg.find_module_corner(mask, mask_center, method=i, displace=3)
                     wrap = seg.perspective_transform(image, corners, int(37.5*args.length), int(37.5*args.width))
@@ -100,20 +90,37 @@ elif os.path.isdir(arg_im):
                         cv.imwrite(str(store_dir/(name+'.png')), wrap)
                         flag = False
                         break
-                    else:
-                        pass
+            except:
+                pass
+
+            
             if flag:
-                for i in [0, 1]:
-                    corners = seg.find_module_corner(mask, mask_center, method=i,
-                                                     displace=3, corner_center=True, center_displace=50)
-                    wrap = seg.perspective_transform(image, corners, int(37.5*args.length), int(37.5*args.width))
-                    peak_x, peak_y = seg.find_cell_corner(wrap)
-                    if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
-                        cv.imwrite(str(store_dir/(name+'.png')), wrap)
-                        flag = False
-                        break
-                    else:
-                        pass
+                try:
+                    for i in [0, 1]:
+                        corners = seg.find_module_corner(mask, mask_center, method=i,
+                                                            displace=3, corner_center=True, center_displace=50)
+                        wrap = seg.perspective_transform(image, corners, int(37.5*args.length), int(37.5*args.width))
+                        peak_x, peak_y = seg.find_cell_corner(wrap)
+                        if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
+                            cv.imwrite(str(store_dir/(name+'.png')), wrap)
+                            flag = False
+                            break
+                except:
+                    pass
+            
+            if flag:
+                try:
+                    for i in [0, 1, 2, 3]:
+                        corners = seg.find_module_corner2(mask, mode=i)
+                        wrap = seg.perspective_transform(image, corners, int(37.5*args.length), int(37.5*args.width))
+                        peak_x, peak_y = seg.find_cell_corner(wrap)
+                        if len(peak_x) > (args.length-4) and len(peak_y) > (args.width-3):
+                            cv.imwrite(str(store_dir/(name+'.png')), wrap)
+                            flag = False
+                            break
+                except:
+                    pass                
+                
             
             if flag:
                 N_err += 1
