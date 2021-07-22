@@ -168,16 +168,16 @@ def perspective_transform(image, src, sizex, sizey):
     return warped
 
 
-def find_cell_corner(wrap, dist=25):
+def find_cell_corner(wrap, dist=25, prom=0.08):
     wrap_g = cv.cvtColor(wrap, cv.COLOR_BGR2GRAY)
 
     sum_x = np.sum(wrap_g, axis=0)
     sum_x = sum_x / np.max(sum_x)
-    peak_x, _ = signal.find_peaks(-sum_x, distance=dist, prominence=0.08)
+    peak_x, _ = signal.find_peaks(-sum_x, distance=dist, prominence=prom)
 
     sum_y = np.sum(wrap_g, axis=1)
     sum_y = sum_y / np.max(sum_y)
-    peak_y, _ = signal.find_peaks(-sum_y, distance=dist, prominence=0.08)
+    peak_y, _ = signal.find_peaks(-sum_y, distance=dist, prominence=prom)
 
     return peak_x, peak_y
 
