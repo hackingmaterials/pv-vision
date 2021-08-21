@@ -1,23 +1,57 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-import zlib, base64
+import zlib
+import base64
 from scipy import signal
-import os
 import json
 
 
 def base64_2_mask(s):
-   z = zlib.decompress(base64.b64decode(s))
-   n = np.fromstring(z, np.uint8)
-   mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
-   return mask
+    """decode the masks from supervisely
+
+    Parameters
+    ----------
+    s: str
+    code of mask from annotated on supervisely
+
+    Returns
+    -------
+    mask: array of bool
+    Image of mask. Only show the convex.
+    """
+    z = zlib.decompress(base64.b64decode(s))
+    n = np.fromstring(z, np.uint8)
+    mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
+
+    return mask
 
 
 def load_mask(path, image, mask_name='module_unet'):
+    """Load the image of mask
+
+    Parameters
+    ----------
+    path: str or pathlib.PosixPath
+    The path of annotation json file
+
+    image: array
+    The original image of solar module
+
+    mask_name: str
+    The annotation name of the mask. Default is 'module_unet'.
+
+    Returns
+    -------
+    mask: array
+    The image of the mask. The shape is the same as the image of module.
+
+    mask_center: array
+    The center coordinate of the mask in the form of [x, y]
+    """
     with open(path, 'r') as file:
         data = json.load(file)
-    if len(data["objects"]) == 1: 
+    if len(data["objects"]) == 1:
         code = data["objects"][0]["bitmap"]["data"]
         origin = data["objects"][0]["bitmap"]["origin"]
     else:
@@ -41,8 +75,23 @@ def load_mask(path, image, mask_name='module_unet'):
     return mask5.astype('uint8'), mask_center.astype(int)
 
 
-def find_cross(part, houghlinePara=50):
-    edge = cv.Canny(part, 0, 1)
+def find_intersection(mask_part, houghlinePara=50):
+    """Find the intersection of two edges. Edges detected by houghline method.
+
+    Parameters
+    ----------
+    mask_part: array
+    Image of the corner part of a mask
+
+    houghlinePara: int
+    Threshold parameter in cv.HoughLines()
+
+    Returns
+    -------
+    x_cross, y_cross: float
+    Coordinate of the intersection
+    """
+    edge = cv.Canny(mask_part, 0, 1)
     lines = cv.HoughLines(edge, 1, np.pi / 180, houghlinePara)
 
     rhos = []
@@ -85,8 +134,38 @@ def find_cross(part, houghlinePara=50):
     return x_cross, y_cross
 
 
-def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
-                       corner_center=False, center_displace=10):
+def find_module_corner(mask, mask_center, dist=200, displace=0, method=0, corner_center=False, center_displace=10):
+    """Detect the corner of solar module. Intersection of edges or corner_detection method is used.
+
+    Parameters
+    ----------
+    mask: array
+    Image of mask
+
+    mask_center: array
+    Coordinate of the mask center
+
+    dist: int
+    Distance threshold between two corners. Default is 200.
+
+    displace: int
+    Displacement of the detected corners to increase tolerance.
+
+    method: int
+    0 = use cv.goodFeaturesToTrack() to detect corners
+    1 = use cv.HoughLines() to detect edges first and then find the intersections
+
+    corner_center: Bool
+    If True, use auto-detected nask center. Otherwise use 'mask_center' parameter. Default is False.
+
+    center_displace: int
+    Displacement of the mask center when dividing the mask into four corner parts
+
+    Returns
+    -------
+    Corners: array
+    Sorted coordinates of module corners. The order is top-left, top-right, bottom-left and bottom-right
+    """
 
     x_m = mask_center[0]
     y_m = mask_center[1]
@@ -102,7 +181,6 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
             ys1.append(y)
         x_m = int(np.mean(xs1))
         y_m = int(np.mean(ys1))
-
     # divide the mask into four corner parts to increase the accuracy
     A = mask[0:y_m+center_displace, 0:x_m+center_displace]
     B = mask[0:y_m+center_displace, x_m-center_displace:]
@@ -129,11 +207,11 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
 
     if method == 1:
         for part in [A, B, C, D]:
-            x_cross, y_cross = find_cross(part)
+            x_cross, y_cross = find_intersection(part)
             xs.append(x_cross)
             ys.append(y_cross)
 
-    # sort out the corners    
+    # sort out the corners
     xs[1] += x_m-center_displace
     ys[2] += y_m-center_displace
     xs[3] += x_m-center_displace
@@ -157,6 +235,25 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0,
 
 
 def perspective_transform(image, src, sizex, sizey):
+    """Do perspective transform on the solar modules. Orientation of the input module is auto-detected. The output
+    module has short side vertically arranged and long side horizontally arranged.
+
+    Parameters
+    ----------
+    image: array
+    Image of solar modules
+
+    src: array
+    Sorted coordinates of corners
+
+    sizex, sizey: int
+    size of the output image. x is the long side and y is the short side.
+
+    Returns
+    -------
+    warped: array
+    Transformed image of solar module
+    """
     src = np.float32(src)
     if np.sum((src[0] - src[2])**2) <= np.sum((src[0] - src[1])**2):
         dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
@@ -169,7 +266,27 @@ def perspective_transform(image, src, sizex, sizey):
     return warped
 
 
-def find_cell_corner(wrap, dist=25, prom=0.08):
+def find_inner_edge(wrap, dist=25, prom=0.08):
+    """Detect the inner edges of the transformed solar module. This can be used to verify whether the module
+    is successfully transformed.
+
+    Parameters:
+    -----------
+    wrap: array
+    Transformed image of solar module
+
+    dist: int
+    Distance threshold between two edge signals. If the size of solar is large, the threshold should be changed.
+    Default is 25 for a 300x600 pixel image of solar module.
+
+    prom: int
+    Prominence parameter in scipy.signal.find_peaks(). If signal is weak, the prominence should be decreased.
+
+    Returns
+    -------
+    peak_x, peak_y: array
+    Indices of peaks along x and y directions
+    """
     wrap_g = cv.cvtColor(wrap, cv.COLOR_BGR2GRAY)
 
     sum_x = np.sum(wrap_g, axis=0)
@@ -183,88 +300,23 @@ def find_cell_corner(wrap, dist=25, prom=0.08):
     return peak_x, peak_y
 
 
-def find_corner_mean(wrap, x, y, displace=7):
-    try:
-        x_l = x - displace
-        x_r = x + displace
-        y_u = y - displace
-        y_d = y + displace
-
-        xs = [x_l, x_r, x_l, x_r]
-        ys = [y_u, y_u, y_d, y_d]
-        crop = perspective_transform(wrap, list(zip(xs, ys)), 
-                                     displace*2, displace*2)
-        crop_g = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-
-        corners = cv.goodFeaturesToTrack(crop_g, 4, 0.01, 1)
-        corners = np.int0(corners)
-        points_x = []
-        points_y = []
-
-        for i in corners:
-            x_c, y_c = i.ravel()
-            points_x.append(x_c)
-            points_y.append(y_c)
-
-        x_mean = np.mean(points_x)
-        y_mean = np.mean(points_y)
-        x_mean += x_l
-        y_mean += y_u
-    except:
-        return x, y
-    else:
-        return x_mean, y_mean
-
-
-def crop_cell(wrap, peak_x, peak_y, saveplace, plot_bool=0, data_bool=0):
-    if plot_bool:
-        plt.imshow(cv.cvtColor(wrap, cv.COLOR_BGR2RGB))
-
-    data = []
-    # n = 0
-    for i in range(len(peak_x)+1):
-        if i == 0:
-            x_l = 0
-            x_r = peak_x[i]
-        elif i == len(peak_x):
-            x_l = peak_x[i-1]
-            x_r = wrap.shape[1]
-        else:
-            x_l = peak_x[i-1]
-            x_r = peak_x[i]
-
-        for j in range(len(peak_y)+1):
-            if j == 0:
-                y_u = 0
-                y_d = peak_y[j]
-            elif j == len(peak_y):
-                y_u = peak_y[j-1]
-                y_d = wrap.shape[0]
-            else: 
-                y_u = peak_y[j-1]
-                y_d = peak_y[j]
-            xs = []
-            ys = []
-            for y_c in [y_u, y_d]:
-                for x_c in [x_l, x_r]:
-                    x_mean, y_mean = find_corner_mean(wrap, x_c, y_c)
-
-                    xs.append(x_mean)
-                    ys.append(y_mean)
-            if plot_bool:
-                plt.scatter(xs, ys)
-            if data_bool:
-                data.append(list(zip(xs, ys)))
-
-            crop = perspective_transform(wrap, list(zip(xs, ys)), 64, 64)
-            cv.imwrite(saveplace+str(i) + "_" + str(j) + ".png", crop)
-            #n += 1
-    if data_bool:
-        return np.array(data)
-
-
-# a new version of finding the module corners
+# a new version of finding the module corners #
 def fill_polygon(points, im_shape):
+    """Fill the polygon defined by convex or contour points
+
+    Parameters
+    ----------
+    points: array
+    Coordinates of the points that define the convex or contour of the mask
+
+    im_shape: array
+    Array shape of the mask
+
+    Returns
+    -------
+    im_cnt: array
+    Filled contour or convex
+    """
     im_cnt = np.zeros((im_shape[0],im_shape[1],1), np.uint8)
     cv.fillPoly(im_cnt, [points], (255,255))
 
@@ -272,14 +324,49 @@ def fill_polygon(points, im_shape):
 
 
 def sort_corners(corners):
-    col_sorted = corners[np.argsort(corners[:,1])]
+    """Sort corners for perspective transform
+
+    Parameters
+    ----------
+    corners: array
+    Corners detected by cv.goodFeaturesToTrack()
+
+    Returns
+    -------
+    sorted_corners: array
+    Sorted coordinates of module corners. The order is top-left, top-right, bottom-left and bottom-right.
+    """
+    col_sorted = corners[np.argsort(corners[:, 1])] # sort on the value in column
+
+    # sort on the value in rows. a, b are the indexes
     a = np.argsort(col_sorted[:2, 0])
     b = np.argsort(col_sorted[2:, 0]) + 2
 
     return col_sorted[np.hstack((a, b))]
 
 
-def find_corners(im, n_corners=4, dist_corners=100, displace=3):
+def find_polygon_corners(im, n_corners=4, dist_corners=100, displace=3):
+    """Use cv.goodFeaturesToTrack to find the four corners of a filled polygon
+
+    Parameters
+    ----------
+    im: array
+    image of the mask
+
+    n_corners: int
+    Number of the corners. Default is 4.
+
+    dist_corners: int
+    Distance threshold between two neighbour corners. Default is 100 pixels.
+
+    displace: int
+    Displace detected corners to increase tolerance. Default is 3.
+
+    Returns
+    -------
+    corners_displaced: array
+    Detected corners that are sorted and displaced.
+    """
     corners_unravel = cv.goodFeaturesToTrack(im, n_corners, 0.01, dist_corners, blockSize=9),
     corners = []
     for corner in corners_unravel[0]:
@@ -289,14 +376,27 @@ def find_corners(im, n_corners=4, dist_corners=100, displace=3):
 
     return corners_displaced
 
+
 def find_module_corner2(mask, mode=0):
-    """
+    """ Detect the corners of a solar module
+
+    Parameters
+    ----------
+    mask: array
+    Image of a mask
+
+    mode: int
     mode == 0: detect corners of the convex of module
     mode == 1: detect corners of the approximated convex of module
     mode == 2: detect corners of the approximated contour of the module
     mode == 3: detect corners of the blurred mask of the module
+
+    Returns
+    -------
+    Corners: array
+    Corners of the solar module
     """
-    blur = cv.blur(mask, (6,6))
+    blur = cv.blur(mask, (6, 6))
     contours, _ = cv.findContours(blur, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     cnt_approx = cv.approxPolyDP(contours[0], 8, True)
     convex = cv.convexHull(contours[0])
@@ -304,16 +404,17 @@ def find_module_corner2(mask, mode=0):
 
     if mode == 0:
         im_conv = fill_polygon(convex, blur.shape)
-        corners = find_corners(im_conv)
+        corners = find_polygon_corners(im_conv)
     elif mode == 1:
         im_conv_app = fill_polygon(conv_approx, blur.shape)
-        corners = find_corners(im_conv_app)
+        corners = find_polygon_corners(im_conv_app)
     elif mode == 2:
         im_cnt_app = fill_polygon(cnt_approx, blur.shape)
-        corners = find_corners(im_cnt_app)
+        corners = find_polygon_corners(im_cnt_app)
     elif mode == 3:
-        corners = find_corners(blur)
+        corners = find_polygon_corners(blur)
     else:
         print("mode must be one of 0, 1, 2")
         return
     return corners
+
