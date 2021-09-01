@@ -266,14 +266,15 @@ def perspective_transform(image, src, sizex, sizey):
     return warped
 
 
-def find_inner_edge(wrap, dist=25, prom=0.08):
+def find_inner_edge(wrap, dist=25, prom=0.08):  # used to be named as find_cell_corner
     """Detect the inner edges of the transformed solar module. This can be used to verify whether the module
     is successfully transformed.
 
     Parameters:
     -----------
     wrap: array
-    Transformed image of solar module
+    Transformed image of solar module. 
+    It should be grayscale or BGR read from Opencv.
 
     dist: int
     Distance threshold between two edge signals. If the size of solar is large, the threshold should be changed.
@@ -287,7 +288,10 @@ def find_inner_edge(wrap, dist=25, prom=0.08):
     peak_x, peak_y: array
     Indices of peaks along x and y directions
     """
-    wrap_g = cv.cvtColor(wrap, cv.COLOR_BGR2GRAY)
+    if len(wrap.shape) == 2:
+        wrap_g = wrap
+    elif len(wrap.shape) == 3:
+        wrap_g = cv.cvtColor(wrap, cv.COLOR_BGR2GRAY)
 
     sum_x = np.sum(wrap_g, axis=0)
     sum_x = sum_x / np.max(sum_x)

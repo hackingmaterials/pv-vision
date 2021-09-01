@@ -90,7 +90,8 @@ def detect_edge(image, peaks_on=0, cell_size=30, split_size=10, im_size=[300, 60
     Parameters
     ----------
     image: array
-    Perspective transformed image of solar module
+    Perspective transformed image of solar module. 
+    Input should be grayscale or BGR read from Opencv
 
     peaks_on: int
     Detect horizontal edges or vertical edges
@@ -121,7 +122,10 @@ def detect_edge(image, peaks_on=0, cell_size=30, split_size=10, im_size=[300, 60
     Position of edges of each split.
     Form is [[Positions of first edge in each split], [Positions of second edges in each split], ...]
     """
-    image_g = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    if len(image.shape) == 2:
+        image_g = image
+    elif len(image.shape) == 3:
+        image_g = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
     if peaks_on == 0:
         splits = np.vsplit(image_g, image_g.shape[0] / split_size)
