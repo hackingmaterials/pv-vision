@@ -1,18 +1,8 @@
-from cv2 import data
 import numpy as np
 import cv2 as cv
-import os
 
-from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn import metrics
-from pathlib import Path
-from imutils.paths import list_images
-from torch.utils.data import dataset
 from tqdm import tqdm
-
-import joblib
 
 from sklearn import utils as sk_utils
 from sklearn.metrics import f1_score
@@ -21,8 +11,6 @@ import itertools
 
 import copy
 
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.under_sampling import RandomUnderSampler
 
 
 def im_flatten(images):

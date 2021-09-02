@@ -20,7 +20,7 @@ import seaborn as sns
 import pandas as pd
 
 
-def predict_failed(y_test, pred_test, images_test, model_name, save_path=None):
+def predict_failed(y_test, pred_test, images_test, model_name=None, save_path=None):
     """Output failed predictions
 
     Parameters
@@ -61,6 +61,7 @@ def predict_failed(y_test, pred_test, images_test, model_name, save_path=None):
             pickle.dump(failed_test, f)
 
     return failed_test
+
 
 def add_fbeta(report, y_true, y_pred, fbeta=2):
     """Add fbeta metric into sklearn.metrics.classification_report
@@ -137,7 +138,7 @@ def metrics_report(y_test, pred_test, model_name=None, save_path=None, fbeta=2, 
     return test_report
 
 
-def draw_cm(solar_df, defect_name, diagonal=True, cbar_size=0.6, linewidth=0.5, save_path=None, model_name=None):
+def draw_cm(defect_name, solar_df=None, y_true=None, y_pred=None, diagonal=True, cbar_size=0.6, linewidth=0.5, save_path=None, model_name=None):
     """Plot the confusion matrix
 
     Parameters
@@ -145,6 +146,10 @@ def draw_cm(solar_df, defect_name, diagonal=True, cbar_size=0.6, linewidth=0.5, 
     solar_df: dict or pandas.core.frame.DataFrame
     Dataframe that indicates the true label and predicted label of all solar cells. Column names for true label and
     predicted should be 'y_true' and 'y_pred'.
+    If None, y_true and y_pred must be passed
+
+    y_true, y_pred: array or list
+    True label and predicted label of all solar cells. It should be passed if solar_df is not passed
 
     defect_name: dict
     Mapping the value of y into label names.
@@ -177,8 +182,13 @@ def draw_cm(solar_df, defect_name, diagonal=True, cbar_size=0.6, linewidth=0.5, 
     Pivot table of confusion matrix. Index is ground truth and column is prediction.
 
     """
-    solar_pv = pd.DataFrame(solar_df)[['y_true', 'y_pred']].groupby(['y_true', 'y_pred'], as_index=False).size().pivot(
-        index='y_true', columns='y_pred', values='size').rename(columns=defect_name, index=defect_name).fillna(0)
+    if not solar_df:
+        solar_pv = pd.DataFrame({"y_true": y_true, "y_pred":y_pred}).groupby(['y_true', 'y_pred'], as_index=False).size().pivot(
+            index='y_true', columns='y_pred', values='size').rename(columns=defect_name, index=defect_name).fillna(0)
+    else:
+        solar_pv = pd.DataFrame(solar_df)[['y_true', 'y_pred']].groupby(['y_true', 'y_pred'], as_index=False).size().pivot(
+            index='y_true', columns='y_pred', values='size').rename(columns=defect_name, index=defect_name).fillna(0)
+    
     if not diagonal:
         np.fill_diagonal(solar_pv.values, np.nan)
 
