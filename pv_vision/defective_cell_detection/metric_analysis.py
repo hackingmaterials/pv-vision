@@ -1,20 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2 as cv
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn import utils as sk_utils
 from sklearn.metrics import fbeta_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import pickle
-from scipy import interp
-from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-from sklearn.preprocessing import label_binarize
 from pathlib import Path
-from tqdm import tqdm
-from PIL import Image
-from imutils.paths import list_images
 from sklearn import metrics
 import seaborn as sns
 import pandas as pd
@@ -233,7 +221,7 @@ def score_compare(reports_dic, score_type, category, hue_order, save_path=None, 
 
     melt = scores.reset_index().melt('index', var_name='model', value_name=score_type)
     ax = sns.barplot(data=melt, x='index', y=score_type, hue='model', hue_order=hue_order)
-    #ax.set_title('Comparison of '+score_type.title())
+    # ax.set_title('Comparison of '+score_type.title())
     ax.set_xlabel('Category')
     ax.set_ylabel(score_type.title())
     plt.legend(loc='upper center', bbox_to_anchor=legend_pos, ncol=legend_col, columnspacing=label_space)
