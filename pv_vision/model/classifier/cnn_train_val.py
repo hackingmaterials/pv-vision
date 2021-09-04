@@ -1,36 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn import utils as sk_utils
-from sklearn.metrics import fbeta_score
+
 from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-import pickle
-from scipy import interp
-from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-from sklearn.preprocessing import label_binarize
-from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
 from imutils.paths import list_images
-from sklearn import metrics
-import seaborn as sns
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import transforms, utils, models
-from torch.utils.data import Dataset, DataLoader, TensorDataset
-import torch.optim as optim
-import copy, random, json
-import pandas as pd
-import pickle
+from torchvision import transforms
+from torch.utils.data import Dataset
+import copy, random
+
 import os
 
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.under_sampling import RandomUnderSampler
 
 class OneRotationTransform:
     """Rotate by one given angles."""
@@ -68,7 +51,7 @@ class SolarDataset(Dataset):
         return image, label
 
 
-def load_data(im_dir, store_name=Fale):
+def load_data(im_dir, store_name=False):
     """load the images and labels
 
     Parameters
@@ -103,13 +86,19 @@ def load_data(im_dir, store_name=Fale):
         return images, labels
 
 
-def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, trainloader, valloader, solar_train, solar_val, criterion, optimizer, scheduler, device, num_epochs=25):
     """Train a neural network using pytorch. Different loss functions are compared
 
     Parameters
     ----------
     model:
     Pytorch model
+
+    trainloader, valloader: 
+    Pytorch dataloader
+
+    solar_train, solar_val:
+    Pytorch dataset
 
     criterion:
     Loss function
@@ -122,6 +111,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
     num_epochs: int
     Number of epochs
+
+    device: torch.device()
 
     Returns
     -------
@@ -260,8 +251,8 @@ def training_plot(epochs, loss_accuracy, metric='loss'):
     metric: str
     Metrics to show
     """
-    plt.plot(range(epochs), loss_accuracy['train'][metric], label='train_'+metric)
-    plt.plot(range(epochs), loss_accuracy['val'][metric], label='val_'+metric)
+    plt.plot(range(epochs), loss_accuracy['train'][metric], label=f'train_{metric}')
+    plt.plot(range(epochs), loss_accuracy['val'][metric], label=f'val_{metric}')
     plt.legend()
 
 
