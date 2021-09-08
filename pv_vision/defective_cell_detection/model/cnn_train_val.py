@@ -51,6 +51,23 @@ class SolarDataset(Dataset):
         return image, label
 
 
+class PredDataset(Dataset):
+    # Only used for prediction
+    # No labels
+    def __init__(self, images, transform):
+        self.images = images
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image = Image.fromarray(cv.cvtColor(self.images[idx], cv.COLOR_BGR2RGB))
+        image = self.transform(image)
+
+        return image
+
+
 def load_data(im_dir, store_name=False):
     """load the images and labels
 
