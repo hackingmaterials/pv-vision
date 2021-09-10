@@ -310,7 +310,7 @@ def inx2coordinate(inx, row=8, col=16):
     return inx % col, inx // col
 
 
-def collect_all_cells(ann_path, pred_labels, true_labels=None, row_col=[8, 16], shape=[300, 600]):
+def collect_all_cells(ann_path, labels_pred=None, labels_true=None, row_col=[8, 16], shape=[300, 600]):
     """Collect the information of all the cells in one module processed by YOLO model
 
     Parameters
@@ -318,13 +318,15 @@ def collect_all_cells(ann_path, pred_labels, true_labels=None, row_col=[8, 16], 
     ann_path: str or pathlib.PosixPath
     Path of ann files
 
-    pred_labels: list
-    Label names of defects in prediction.
-    E.g. ['crack_bbox_yolo', 'oxygen_bbox_yolo', 'solder_bbox_yolo', 'intra_bbox_yolo']
-
-    true_labels: list
-    Label names of defects in ground truth. Pass the value if true labels are presented in the ann files
-    E.g. ['crack_bbox', 'oxygen_bbox', 'solder_bbox', 'intra_bbox']
+    labels_pred, labels_true: dict
+    Mapping label names into names of defects.
+    E.g. true label:
+    label2defect = {
+    "crack_bbox": "crack",
+    "oxygen_bbox": "oxygen",
+    "solder_bbox": "solder",
+    "intra_bbox": "intra"
+    }
 
     row_col: list
     Number of rows/columns of module
@@ -342,43 +344,43 @@ def collect_all_cells(ann_path, pred_labels, true_labels=None, row_col=[8, 16], 
     #module_name = str(ann_path).split('/')[-1].split('.')[0]
 
     all_names = np.full(row_col[0] * row_col[1], fill_value=module_name).tolist()
-    all_labels = np.full(row_col[0] * row_col[1], fill_value='intact').tolist()
     all_index = list(range(row_col[0] * row_col[1]))
     all_x = np.tile(list(range(row_col[1])), row_col[0]).tolist()
     all_y = np.tile(list(range(row_col[0])), (row_col[1], 1)).T.flatten().tolist()
 
-    with open(ann_path, 'r') as file:
-        data = json.load(file)
-    if len(data['objects']) > 0:
-        for obj in data['objects']:
-            classTitle = obj['classTitle']
-            if classTitle in pred_labels:
-                points = obj['points']['exterior'][0]
-                inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
-                all_labels[inx] = classTitle
-
     cell_info = {
         'module_name': all_names,
         'index': all_index,
-        'defects_pred': all_labels,
         'x': all_x,
         'y': all_y,
     }
 
-    if true_labels:
-        all_true_labels = np.full(row_col[0] * row_col[1], fill_value='intact').tolist()
+    with open(ann_path, 'r') as file:
+        data = json.load(file)
+    if labels_true:
+        all_labels = np.full(row_col[0] * row_col[1], fill_value='intact').tolist()
         if len(data['objects']) > 0:
             for obj in data['objects']:
                 classTitle = obj['classTitle']
-                if classTitle in true_labels:
+                if classTitle in labels_true.keys():
                     points = obj['points']['exterior'][0]
                     inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
-                    all_true_labels[inx] = classTitle
-        cell_info['defects_true'] = all_true_labels
+                    all_labels[inx] = labels_true[classTitle]
+        cell_info['defects_true'] = all_labels
+    if labels_pred:
+        all_second_labels = np.full(row_col[0] * row_col[1], fill_value='intact').tolist()
+        if len(data['objects']) > 0:
+            for obj in data['objects']:
+                classTitle = obj['classTitle']
+                if classTitle in labels_pred.keys():
+                    points = obj['points']['exterior'][0]
+                    inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
+                    all_second_labels[inx] = labels_pred[classTitle]
+        cell_info['defects_pred'] = all_second_labels
     return cell_info
 
 
-def collect_defects(ann_path, defects_dic, row_col=[8, 16], shape=[300, 600]):
+def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 600]):
     """Only collect the information of defective cells.
     This method is used when applying YOLO model on data without true labels
 
@@ -397,6 +399,16 @@ def collect_defects(ann_path, defects_dic, row_col=[8, 16], shape=[300, 600]):
         'y': [],
         'confidence': []
         }
+
+    labels: dict
+    Mapping label names into names of defects.
+    E.g. true label:
+    label2defect = {
+    "crack_bbox": "crack",
+    "oxygen_bbox": "oxygen",
+    "solder_bbox": "solder",
+    "intra_bbox": "intra"
+    }
 
     row_col: list
     Number of rows/columns of module
@@ -429,7 +441,7 @@ def collect_defects(ann_path, defects_dic, row_col=[8, 16], shape=[300, 600]):
             x, y = inx2coordinate(inx, row=row_col[0], col=row_col[1])
             defects_dic['module_name'].append(module_name)
             defects_dic['index'].append(inx)
-            defects_dic['defects'].append(classTitle)
+            defects_dic['defects'].append(labels[classTitle])
             defects_dic['x'].append(x)
             defects_dic['y'].append(y)
             defects_dic['confidence'].append(confidence)
@@ -581,7 +593,7 @@ def plot_heatmap(dataframe, category, defect_col='defects', bar_color='Blues', l
     pivot table of defect distribution
     """
     defect_df = dataframe.loc[dataframe[defect_col] == category, ['x', 'y']]
-    defect_pv = defect_df.groupby(['x','y'], as_index=False).size().pivot('y','x','size')
+    defect_pv = defect_df.groupby(['x', 'y'], as_index=False).size().pivot('y', 'x', 'size')
 
     ax = sns.heatmap(defect_pv, square=True, cbar_kws={'shrink':cbar_size}, cmap=bar_color, linewidths=linewidths)
     #ax.invert_yaxis()
