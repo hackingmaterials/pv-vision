@@ -1,23 +1,10 @@
-import numpy as np 
-import cv2 as cv 
+import cv2 as cv
 import json
 import os
 from tqdm import tqdm
 from pathlib import Path
 import argparse
-
-
-def draw_rec(ann_path, image, color, thickness=3):
-    with open(ann_path, 'r') as file:
-        data = json.load(file)
-    if len(data['objects']) > 0:
-        for obj in data['objects']:
-            classTitle = obj['classTitle']
-            points = obj['points']['exterior']
-
-            cv.rectangle(image, tuple(points[0]), tuple(points[1]),
-                         color[classTitle], thickness)
-
+import pv_vision.defective_cell_detection.draw_bbox as draw
 
 parser = argparse.ArgumentParser()
 
@@ -41,7 +28,7 @@ if os.path.isfile(arg_im):
     name = file_name.split('.')[0]
     image = cv.imread(str(arg_im))
 
-    draw_rec(arg_ann, image, arg_color, 3)
+    draw.draw_bbox(arg_ann, image, arg_color, 3)
 
     if args.output:
         cv.imwrite(str(args.output), image)
@@ -57,7 +44,7 @@ elif os.path.isdir(arg_im):
         ann_files.remove('.DS_Store')
 
     if args.output:
-        store_dir = Path(args.output)
+        store_dir = Path(args.output) / 'visualized_images'
     else:
         store_dir = Path('visualized_images')
     os.makedirs(store_dir, exist_ok=True)
@@ -67,6 +54,6 @@ elif os.path.isdir(arg_im):
         ann_path = arg_ann/ann_file
         image = cv.imread(str(arg_im/(name+im_type)))
 
-        draw_rec(ann_path, image, arg_color, 3)
+        draw.draw_bbox(ann_path, image, arg_color, 3)
 
         cv.imwrite(str(store_dir/(name+'.png')), image)

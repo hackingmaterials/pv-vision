@@ -10,10 +10,14 @@ parser.add_argument('-a', '--ann', type=str,
                     help='input ann folder, path separated with /')
 parser.add_argument('-n', '--name', type=str, default=None,
                     help='json file which contains the name of defects')
+parser.add_argument('-o', '--output', type=str, default='.',
+                    help='the name or dir of output')
 args = parser.parse_args()
 
 ann_dir = Path(args.ann)
 ann_files = os.listdir(ann_dir)
+store_dir = Path(args.output)
+os.makedirs(store_dir, exist_ok=True)
 
 if args.name:
     with open(args.name, 'r') as f:
@@ -52,19 +56,19 @@ for file in tqdm(ann_files):
         content = [name, 'category1', 'crack', str(crack),
                    'oxygen', str(oxygen), 'solder', str(solder),
                    'intra', str(intra), '\n']
-        with open("cell_issues.csv", 'a') as f2:
+        with open(store_dir/"cell_issues.csv", 'a') as f2:
             f2.write(','.join(content))
         
     elif (crack > 1 or oxygen > 0 or solder > 0 or intra > 0) and intra < 2:
         content = [name, 'category2', 'crack', str(crack),
                    'oxygen', str(oxygen), 'solder', str(solder),
                    'intra', str(intra), '\n']
-        with open("cell_issues.csv",'a') as f2:
+        with open(store_dir/"cell_issues.csv",'a') as f2:
             f2.write(','.join(content))
 
     elif intra > 1:
         content = [name, 'category3', 'crack', str(crack),
                    'oxygen', str(oxygen), 'solder', str(solder),
                    'intra', str(intra), '\n']
-        with open("cell_issues.csv",'a') as f2:
+        with open(store_dir/"cell_issues.csv",'a') as f2:
             f2.write(','.join(content))
