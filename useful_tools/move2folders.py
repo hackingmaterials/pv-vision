@@ -11,12 +11,14 @@ parser.add_argument('-c', '--csv', type=str,
                     help='input csv file, path separated with /')
 parser.add_argument('-i', '--image', type=str,
                     help='image folder, path separated with /')
+parser.add_argument('-o', '--output', type=str, default='.',
+                    help='the name or dir of output')
 args = parser.parse_args()
 
 args_csv = Path(args.csv)
 arg_image = Path(args.image)
 
-folder = Path('classified_images')
+folder = Path(args.output) / 'classified_images'
 for subfolder in ['category1', 'category2', 'category3']:
     os.makedirs(folder/subfolder, exist_ok=True)
 
