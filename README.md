@@ -84,7 +84,7 @@ PV-pipeline
 ├── yolo_model
 │   ├── config.json
 │   ├── model.weights
-│   └── model..cfg
+│   └── model.cfg
 ├── pipeline.sh
 ├── raw_images
 │   ├── img1.png
