@@ -1,4 +1,4 @@
-# pv_vision
+# PV-Vision
 
 ## Overview
 
@@ -140,3 +140,5 @@ PV-pipeline
         └── img5.png.json
 
 ```
+## Analyze data
+We also provide you with packages of analyzing your own data. The tutorials of using `PV-Vision` can be found in folder `tutorials`. The tutorials cover *perspective transformation*, *cell segmentation*, *model inference* and *model output analysis*. 

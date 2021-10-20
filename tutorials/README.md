@@ -8,6 +8,8 @@ Here are some tutorials of using the packages, including
 
 3. Classify the solar cells using CNN classifier or Random Forest
 
-4. IoU test of semantic segmentation
+4. Analyze the output results from YOLO model 
 
-5. Extract the features of the cracks from the solar cells
+5. IoU test of semantic segmentation
+
+6. Extract the features of the cracks from the solar cells
