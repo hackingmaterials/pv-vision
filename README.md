@@ -2,9 +2,9 @@
 
 ## Overview
 
- Image analysis of defects on solar cell
+ Image analysis of defects on solar cells.
 
-This package allows you to analyze electroluminescene (EL) images of PV module. The methos in this package include image segmentation, crack detection, defective cells classification and crack-power loss correlation. 
+This package allows you to analyze electroluminescene (EL) images of PV module. The methods in this package include image segmentation, crack detection, defective cells classification and crack-power loss correlation. 
 
 You can either use the package `pv_vision` and write your own codes following the instruction in tutorials, or you can directly run our `pipeline.sh`. When `pipeline.sh` is used, `YOLO` model will be applied to do predictions in default. The output will give you the analysis from the model.
 
