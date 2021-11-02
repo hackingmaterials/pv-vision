@@ -1,6 +1,9 @@
 **/.DS_Store
 **/__pycache__
+**/colormap.csv
 examples
 test
+**/testing
+**/UnitTest.py
 output
 **/.idea
