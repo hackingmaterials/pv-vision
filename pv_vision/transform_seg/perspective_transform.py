@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2 as cv
 import zlib
 import base64
@@ -21,7 +20,7 @@ def base64_2_mask(s):
     Image of mask. Only show the convex.
     """
     z = zlib.decompress(base64.b64decode(s))
-    n = np.fromstring(z, np.uint8)
+    n = np.frombuffer(z, np.uint8)
     mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
 
     return mask

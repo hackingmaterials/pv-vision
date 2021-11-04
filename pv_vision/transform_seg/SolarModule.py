@@ -1,6 +1,8 @@
-import pv_vision.transform_seg.perspective_transform as seg
+import pv_vision.transform_seg.perspective_transform as transform
+import pv_vision.transform_seg.cell_crop as seg
 import numpy as np
 import cv2 as cv
+from pathlib import Path
 
 
 class SolarModule:
@@ -146,6 +148,210 @@ class SolarModule:
         The folder path of the original images.
         """
         cv.imwrite(str(save_path), self._image)
+
+
+class MaskModule(SolarModule):
+    def __init__(self, image, row, col):
+        super().__init__(image, row, col)
+        self._mask = None
+        self._mask_center = None
+        self._corners = None
+
+    @property
+    def mask(self):
+        if self._mask is None:
+            print("Mask is not loaded")
+
+        return self._mask
+
+    @property
+    def mask_center(self):
+        if self._mask_center is None:
+            print("Mask is not loaded")
+
+        return self._mask_center
+
+    @property
+    def corners(self):
+        if self._corners is None:
+            print("Corners are not detected")
+
+        return self._corners
+
+    def load_mask(self, mask_path, output=False):
+        self._mask, self._mask_center = \
+            transform.load_mask(mask_path, self._image, 'module_unet')
+
+        if output:
+            return self._mask, self._mask_center
+
+    def corner_detection_line(self, dist=200, displace=0, method=0,
+                              corner_center=False, center_displace=10, output=False):
+        """Detect the corner of solar module. Intersection of edges or corner_detection method is used.
+
+        Parameters
+        ----------
+        mask: array
+        Image of mask
+
+        mask_center: array
+        Coordinate of the mask center
+
+        dist: int
+        Distance threshold between two corners. Default is 200.
+
+        displace: int
+        Displacement of the detected corners to increase tolerance.
+
+        method: int
+        0 = use cv.goodFeaturesToTrack() to detect corners
+        1 = use cv.HoughLines() to detect edges first and then find the intersections
+
+        corner_center: Bool
+        If True, use auto-detected nask center. Otherwise use 'mask_center' parameter. Default is False.
+
+        center_displace: int
+        Displacement of the mask center when dividing the mask into four corner parts
+
+        output: bool
+        If true, return the corners
+
+        Returns
+        -------
+        Corners: array
+        Sorted coordinates of module corners. The order is top-left, top-right, bottom-left and bottom-right
+        """
+        if self._mask is None:
+            print("Mask is not loaded")
+            return None
+        self._corners = transform.find_module_corner(self._mask, self._mask_center,
+                                               dist, displace, method, corner_center, center_displace)
+        if output:
+            return self._corners
+
+    def corner_detection_cont(self, mode=0, output=False):
+        """ Detect the corners of a solar module
+
+        Parameters
+        ----------
+        mode: int
+        mode == 0: detect corners of the convex of module
+        mode == 1: detect corners of the approximated convex of module
+        mode == 2: detect corners of the approximated contour of the module
+        mode == 3: detect corners of the blurred mask of the module
+
+        output: bool
+        If true, return the corners
+
+        Returns
+        -------
+        Corners: array
+        Corners of the solar module
+        """
+        if self._mask is None:
+            print("Mask is not loaded")
+            return None
+        self._corners = transform.find_module_corner2(self._mask, mode)
+        if output:
+            return self._corners
+
+    def transform(self, width=600, height=300, img_only=False):
+        """Do perspective transform on the solar module
+
+        Parameters
+        ----------
+        width, height: int
+        Width/height of transformed image
+
+        img_only: bool
+        If true, only return the image of transformed module. Otherwise return a transformed module instance
+
+        Returns
+        -------
+        wrap: array or instance
+        Transformed solar module
+        """
+        if self._corners is None:
+            print("Corners are not detected")
+        else:
+            wrap = transform.perspective_transform(self._image, self._corners, width, height)
+            if img_only:
+                return wrap
+            else:
+                return TransformedModule(wrap, self._row, self._col)
+
+
+class TransformedModule(SolarModule):
+    def __init__(self, image, row, col):
+        super().__init__(image, row, col)
+        if len(self._size) != 2:
+            super().remove_channel(in_place=True)
+
+    def is_transformed(self, x_min, y_min):
+        """Determine whether the module is properly transformed by checking the number of internal edges.
+
+        Parameters
+        ----------
+        x_min, y_min: int
+        The threshold of the number of detected internal edges. X means col and y means row
+
+        Returns
+        -------
+        bool
+        """
+        peak_x, peak_y = transform.find_inner_edge(self._image)
+        return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
+
+    def crop_cell(self):
+        splits_inx_x, edgelist_x = seg.detect_edge(self._image, peaks_on=0)
+        abs_x = seg.linear_regression(splits_inx_x, edgelist_x)
+        splits_inx_y, edgelist_y = seg.detect_edge(self._image, peaks_on=1)
+        abs_y = seg.linear_regression(splits_inx_y, edgelist_y)
+
+        abs_x_couple = seg.couple_edges(abs_x, length=self.size[1])
+        abs_y_couple = seg.couple_edges(abs_y, length=self.size[0])
+
+        return np.array(seg.segment_cell(self.image, abs_x_couple, abs_y_couple))
+
+    @staticmethod
+    def write_cells(single_cells, defects_inx, defect2folder, name, save_path):
+        """Output cells into folders of corresponding class
+
+        Parameters
+        ----------
+        single_cells: array
+        Images of cropped cells
+
+        defects_inx: dict
+        Dict of defects with the index of the defective cells
+
+        defect2folder: dict
+        Convert keys in defects_inx into names of folders
+        e.g.
+        {
+            "crack_bbox": "crack",
+            "oxygen_bbox": "oxygen",
+            "solder_bbox": "solder",
+            "intra_bbox": "intra"
+        }
+
+        name: str
+        Name of the solar module
+
+        save_path: str or pathlib.PosixPath
+        Path to store the output
+        """
+        for inx, cell in enumerate(single_cells):
+            flag = True
+            for key, value in defects_inx.items():
+                if inx in value:
+                    cv.imwrite(str(Path(save_path) / f"{defect2folder[key]}/{name}__{str(inx)}.png"), cell)
+                    flag = False
+            if flag:
+                cv.imwrite(str(Path(save_path) / f"intact/{name}__{str(inx)}.png"), cell)
+
+
+
 
 
 

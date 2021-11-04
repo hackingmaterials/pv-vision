@@ -1,14 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2 as cv
 import json
-import os
-import shutil
 from pathlib import Path
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
-from tqdm import tqdm
-from imutils.paths import list_images
+
 
 
 def linear(x, a, b):
