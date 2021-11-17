@@ -1,0 +1,1022 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 300,
+        "width": 600
+    },
+    "objects": [
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        333,
+                        4
+                    ],
+                    [
+                        376,
+                        38
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        563,
+                        0
+                    ],
+                    [
+                        600,
+                        38
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        295,
+                        34
+                    ],
+                    [
+                        335,
+                        72
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        178,
+                        223
+                    ],
+                    [
+                        222,
+                        261
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        560,
+                        185
+                    ],
+                    [
+                        599,
+                        224
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        0,
+                        187
+                    ],
+                    [
+                        39,
+                        227
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        35,
+                        260
+                    ],
+                    [
+                        71,
+                        300
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        562,
+                        110
+                    ],
+                    [
+                        599,
+                        149
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        409,
+                        36
+                    ],
+                    [
+                        450,
+                        76
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        331,
+                        261
+                    ],
+                    [
+                        372,
+                        297
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        485,
+                        186
+                    ],
+                    [
+                        525,
+                        223
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        178,
+                        265
+                    ],
+                    [
+                        223,
+                        299
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        486,
+                        110
+                    ],
+                    [
+                        525,
+                        152
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        564,
+                        38
+                    ],
+                    [
+                        600,
+                        74
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        449,
+                        186
+                    ],
+                    [
+                        488,
+                        224
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        146,
+                        38
+                    ],
+                    [
+                        186,
+                        75
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        370,
+                        184
+                    ],
+                    [
+                        410,
+                        225
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        295,
+                        0
+                    ],
+                    [
+                        335,
+                        35
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        408,
+                        148
+                    ],
+                    [
+                        451,
+                        187
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        183,
+                        150
+                    ],
+                    [
+                        219,
+                        188
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        220,
+                        74
+                    ],
+                    [
+                        260,
+                        111
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        293,
+                        260
+                    ],
+                    [
+                        333,
+                        300
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        332,
+                        183
+                    ],
+                    [
+                        372,
+                        224
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        449,
+                        38
+                    ],
+                    [
+                        488,
+                        74
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        409,
+                        184
+                    ],
+                    [
+                        450,
+                        226
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        36,
+                        187
+                    ],
+                    [
+                        76,
+                        225
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        526,
+                        227
+                    ],
+                    [
+                        564,
+                        261
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        294,
+                        187
+                    ],
+                    [
+                        334,
+                        225
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        112,
+                        76
+                    ],
+                    [
+                        148,
+                        113
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        254,
+                        149
+                    ],
+                    [
+                        297,
+                        186
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "intra_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        35,
+                        114
+                    ],
+                    [
+                        74,
+                        152
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        523,
+                        0
+                    ],
+                    [
+                        564,
+                        35
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        407,
+                        261
+                    ],
+                    [
+                        450,
+                        299
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        563,
+                        73
+                    ],
+                    [
+                        600,
+                        112
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        1,
+                        148
+                    ],
+                    [
+                        37,
+                        189
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        218,
+                        111
+                    ],
+                    [
+                        259,
+                        150
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:25.107Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        333,
+                        148
+                    ],
+                    [
+                        371,
+                        184
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:38:54.170Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        3,
+                        3
+                    ],
+                    [
+                        38,
+                        39
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:38:57.178Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        148,
+                        0
+                    ],
+                    [
+                        185,
+                        36
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:00.479Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        220,
+                        34
+                    ],
+                    [
+                        260,
+                        70
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:05.988Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        1,
+                        113
+                    ],
+                    [
+                        37,
+                        150
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:09.907Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        413,
+                        109
+                    ],
+                    [
+                        451,
+                        147
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:16.362Z",
+            "updatedAt": "2021-08-21T06:39:21.433Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        252,
+                        225
+                    ],
+                    [
+                        293,
+                        264
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:19.010Z",
+            "updatedAt": "2021-08-21T06:39:24.096Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        0,
+                        228
+                    ],
+                    [
+                        35,
+                        264
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:21.280Z",
+            "updatedAt": "2021-08-21T06:39:21.280Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        107,
+                        263
+                    ],
+                    [
+                        142,
+                        300
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "todd",
+            "createdAt": "2021-08-21T06:39:23.956Z",
+            "updatedAt": "2021-08-21T06:39:23.956Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        253,
+                        266
+                    ],
+                    [
+                        293,
+                        300
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}

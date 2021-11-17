@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 class SolarModule:
+    """Parent class. This class provide basic methods of processing a module image"""
     def __init__(self, image, row, col):
         self._image = image
         self._size = image.shape
@@ -151,6 +152,7 @@ class SolarModule:
 
 
 class MaskModule(SolarModule):
+    """Raw module image class that has a mask of target modules"""
     def __init__(self, image, row, col):
         super().__init__(image, row, col)
         self._mask = None
@@ -282,16 +284,21 @@ class MaskModule(SolarModule):
 
 
 class TransformedModule(SolarModule):
+    """Solar module class after perspective transformation"""
     def __init__(self, image, row, col):
         super().__init__(image, row, col)
         if len(self._size) != 2:
             super().remove_channel(in_place=True)
-
-    def is_transformed(self, x_min, y_min):
+    
+    @staticmethod
+    def is_transformed(image, x_min, y_min):
         """Determine whether the module is properly transformed by checking the number of internal edges.
 
         Parameters
         ----------
+        image: array
+        The image that needs to be checked
+
         x_min, y_min: int
         The threshold of the number of detected internal edges. X means col and y means row
 
@@ -299,7 +306,7 @@ class TransformedModule(SolarModule):
         -------
         bool
         """
-        peak_x, peak_y = transform.find_inner_edge(self._image)
+        peak_x, peak_y = transform.find_inner_edge(image)
         return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
 
     def crop_cell(self):
@@ -312,6 +319,37 @@ class TransformedModule(SolarModule):
         abs_y_couple = seg.couple_edges(abs_y, length=self.size[0])
 
         return np.array(seg.segment_cell(self.image, abs_x_couple, abs_y_couple))
+
+    def classify_cells(self, ann_path, defects_inx_dic):
+        """Classify solar cells based on the class of the annotation of bounding box on the solar module
+
+        Parameters
+        ----------
+        ann_path: str or pathlib.PosixPath
+        Path of annotation file
+
+        defects_inx_dic: dict
+        Dict of defects with empty value. Used to store the index of the defective cells
+        e.g.
+        defects_dic = {
+            'crack_bbox': [],
+            'solder_bbox': [],
+            'intra_bbox': [],
+            'oxygen_bbox': []
+        }
+
+        row_col: list
+        [row, col] of solar module
+
+        shape: list
+        [height, width] of solar module image
+
+        Returns
+        -------
+        defects_inx_dic:
+        Dict of defects with the index of the defective cells
+        """
+        return seg.classify_cells(ann_path, defects_inx_dic, row_col=self.row_col, shape=self.size)
 
     @staticmethod
     def write_cells(single_cells, defects_inx, defect2folder, name, save_path):
@@ -341,14 +379,7 @@ class TransformedModule(SolarModule):
         save_path: str or pathlib.PosixPath
         Path to store the output
         """
-        for inx, cell in enumerate(single_cells):
-            flag = True
-            for key, value in defects_inx.items():
-                if inx in value:
-                    cv.imwrite(str(Path(save_path) / f"{defect2folder[key]}/{name}__{str(inx)}.png"), cell)
-                    flag = False
-            if flag:
-                cv.imwrite(str(Path(save_path) / f"intact/{name}__{str(inx)}.png"), cell)
+        seg.write_cells(single_cells, defects_inx, defect2folder, name, save_path)
 
 
 

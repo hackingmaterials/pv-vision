@@ -1,0 +1,846 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 300,
+        "width": 600
+    },
+    "objects": [
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        454,
+                        0
+                    ],
+                    [
+                        497,
+                        37
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        259,
+                        71
+                    ],
+                    [
+                        305,
+                        111
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        456,
+                        73
+                    ],
+                    [
+                        498,
+                        111
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        218,
+                        109
+                    ],
+                    [
+                        262,
+                        152
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        412,
+                        147
+                    ],
+                    [
+                        459,
+                        191
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        409,
+                        225
+                    ],
+                    [
+                        455,
+                        265
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        67,
+                        189
+                    ],
+                    [
+                        110,
+                        224
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        566,
+                        224
+                    ],
+                    [
+                        600,
+                        262
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        562,
+                        263
+                    ],
+                    [
+                        598,
+                        297
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        72,
+                        1
+                    ],
+                    [
+                        112,
+                        39
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        334,
+                        226
+                    ],
+                    [
+                        377,
+                        266
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        338,
+                        73
+                    ],
+                    [
+                        379,
+                        110
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        259,
+                        149
+                    ],
+                    [
+                        301,
+                        189
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        494,
+                        71
+                    ],
+                    [
+                        535,
+                        112
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        217,
+                        188
+                    ],
+                    [
+                        262,
+                        229
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        529,
+                        226
+                    ],
+                    [
+                        569,
+                        261
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        294,
+                        265
+                    ],
+                    [
+                        339,
+                        296
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        332,
+                        191
+                    ],
+                    [
+                        379,
+                        229
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "solder_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        0,
+                        39
+                    ],
+                    [
+                        39,
+                        73
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        569,
+                        73
+                    ],
+                    [
+                        600,
+                        113
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        110,
+                        189
+                    ],
+                    [
+                        145,
+                        225
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        0,
+                        228
+                    ],
+                    [
+                        35,
+                        262
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        224,
+                        0
+                    ],
+                    [
+                        263,
+                        34
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        181,
+                        73
+                    ],
+                    [
+                        225,
+                        110
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        188,
+                        0
+                    ],
+                    [
+                        226,
+                        35
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        417,
+                        71
+                    ],
+                    [
+                        457,
+                        114
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        567,
+                        2
+                    ],
+                    [
+                        600,
+                        34
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        569,
+                        35
+                    ],
+                    [
+                        600,
+                        70
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        181,
+                        150
+                    ],
+                    [
+                        221,
+                        184
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        300,
+                        149
+                    ],
+                    [
+                        337,
+                        189
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        181,
+                        190
+                    ],
+                    [
+                        220,
+                        227
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        145,
+                        191
+                    ],
+                    [
+                        181,
+                        225
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        144,
+                        227
+                    ],
+                    [
+                        182,
+                        263
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        179,
+                        227
+                    ],
+                    [
+                        220,
+                        264
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        219,
+                        228
+                    ],
+                    [
+                        259,
+                        265
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.187Z",
+            "updatedAt": "2021-08-21T22:14:20.936Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        145,
+                        263
+                    ],
+                    [
+                        184,
+                        300
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T22:14:06.342Z",
+            "updatedAt": "2021-08-21T22:14:18.076Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        182,
+                        35
+                    ],
+                    [
+                        225,
+                        74
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T22:14:20.782Z",
+            "updatedAt": "2021-08-21T22:14:20.782Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        32,
+                        226
+                    ],
+                    [
+                        73,
+                        267
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}

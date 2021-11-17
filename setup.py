@@ -9,8 +9,7 @@ setup(
     version="0.0.1",
     author="XinChen",
     author_email="chenxin0210@lbl.gov",
-    description="Image analysis of defects on solar modules, "
-    "including automatic detection and power loss prediction",
+    description="Image analysis of defects on solar modules, including automatic detection and power loss prediction",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hackingmaterials/pv-vision",
