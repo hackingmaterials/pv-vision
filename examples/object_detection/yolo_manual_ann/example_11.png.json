@@ -1,0 +1,32 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 300,
+        "width": 600
+    },
+    "objects": [
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-21T06:59:24.758Z",
+            "updatedAt": "2021-08-21T06:59:24.758Z",
+            "tags": [],
+            "classTitle": "solder_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        179,
+                        146
+                    ],
+                    [
+                        220,
+                        191
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}

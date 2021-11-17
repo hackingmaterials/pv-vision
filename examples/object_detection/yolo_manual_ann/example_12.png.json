@@ -1,0 +1,120 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 300,
+        "width": 600
+    },
+    "objects": [
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:24.569Z",
+            "updatedAt": "2021-08-19T02:45:24.569Z",
+            "tags": [],
+            "classTitle": "crack_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        341,
+                        226
+                    ],
+                    [
+                        383,
+                        266
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:24.569Z",
+            "updatedAt": "2021-08-19T02:45:24.569Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        454,
+                        113
+                    ],
+                    [
+                        496,
+                        152
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:24.569Z",
+            "updatedAt": "2021-08-19T02:45:24.569Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        264,
+                        111
+                    ],
+                    [
+                        307,
+                        150
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:24.569Z",
+            "updatedAt": "2021-08-19T02:45:24.569Z",
+            "tags": [],
+            "classTitle": "intra_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        562,
+                        113
+                    ],
+                    [
+                        599,
+                        152
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-19T02:45:24.569Z",
+            "updatedAt": "2021-08-19T02:45:24.569Z",
+            "tags": [],
+            "classTitle": "oxygen_bbox",
+            "points": {
+                "exterior": [
+                    [
+                        37,
+                        113
+                    ],
+                    [
+                        74,
+                        145
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}
