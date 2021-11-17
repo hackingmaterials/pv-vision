@@ -310,7 +310,7 @@ def inx2coordinate(inx, row=8, col=16):
     return inx % col, inx // col
 
 
-def collect_all_cells(ann_path, labels_pred=None, labels_true=None, row_col=[8, 16], shape=[300, 600]):
+def collect_all_cells(ann_path, labels_pred=None, labels_true=None, pred_key="labels_pred", true_key="labels_true", row_col=[8, 16], shape=[300, 600]):
     """Collect the information of all the cells in one module processed by YOLO model
 
     Parameters
@@ -327,6 +327,9 @@ def collect_all_cells(ann_path, labels_pred=None, labels_true=None, row_col=[8, 
     "solder_bbox": "solder",
     "intra_bbox": "intra"
     }
+
+    pred_key, true_key: str
+    Key name of labels in the output "cell_info"
 
     row_col: list
     Number of rows/columns of module
@@ -366,7 +369,7 @@ def collect_all_cells(ann_path, labels_pred=None, labels_true=None, row_col=[8, 
                     points = obj['points']['exterior'][0]
                     inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
                     all_labels[inx] = labels_true[classTitle]
-        cell_info['defects_true'] = all_labels
+        cell_info[true_key] = all_labels
     if labels_pred:
         all_second_labels = np.full(row_col[0] * row_col[1], fill_value='intact').tolist()
         if len(data['objects']) > 0:
@@ -376,11 +379,11 @@ def collect_all_cells(ann_path, labels_pred=None, labels_true=None, row_col=[8, 
                     points = obj['points']['exterior'][0]
                     inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
                     all_second_labels[inx] = labels_pred[classTitle]
-        cell_info['defects_pred'] = all_second_labels
+        cell_info[pred_key] = all_second_labels
     return cell_info
 
 
-def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 600]):
+def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 600], mode=1):
     """Only collect the information of defective cells.
     This method is used when applying YOLO model on data without true labels
 
@@ -416,6 +419,10 @@ def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 
     shape: list
     Shape of the module image in the form of [height, width]
 
+    mode: int
+    If 0, collect the true labels
+    If 1, collect the predicted labels
+
     Returns
     -------
     defects_dic: dict
@@ -435,7 +442,6 @@ def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 
         for obj in data['objects']:
             classTitle = obj['classTitle']
             points = obj['points']['exterior'][0]
-            confidence = obj['tags'][0]['value']
             inx = coordinate2inx(points, row=row_col[0], col=row_col[1], im_shape=shape)
             # x, y = coordinate2coordinate(points, row=row_col[0], col=row_col[1], im_shape=shape)
             x, y = inx2coordinate(inx, row=row_col[0], col=row_col[1])
@@ -444,7 +450,9 @@ def collect_defects(ann_path, defects_dic, labels, row_col=[8, 16], shape=[300, 
             defects_dic['defects'].append(labels[classTitle])
             defects_dic['x'].append(x)
             defects_dic['y'].append(y)
-            defects_dic['confidence'].append(confidence)
+            if mode == 1:
+                confidence = obj['tags'][0]['value']
+                defects_dic['confidence'].append(confidence)
 
     return defects_dic
 
