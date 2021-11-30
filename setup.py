@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "matplotlib==3.4.2",
-        "opencv_python==4.4.0.44",
+        "opencv_python==4.4.0.46",
         "seaborn==0.11.2",
         "torchvision==0.7.0",
         "pandas==1.3.2",
@@ -29,7 +29,7 @@ setup(
         "Pillow==8.3.2",
         "scikit_learn==0.24.2",
     ],
-    license=["BSD"],
+    license="BSD",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
