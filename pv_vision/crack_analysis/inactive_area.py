@@ -8,6 +8,21 @@ import json
 from scipy import stats
 
 
+def skeleton_crack(mask_crack):
+    """Skeletonize crack masks
+    Parameteres
+    -----------
+    mask_crack: array
+    Mask of cracks
+
+    Returns
+    -------
+    ske_crack: array
+    Skeletonized crack mask
+    """
+    return skeletonize(mask_crack).astype(np.uint8)
+
+
 def extend_busbar(mask_busbar, kernel_size=(10, 100)):
     """Connet and extend broken busbars. Return the skeleton of the busbar masks
     Parameters
@@ -167,7 +182,7 @@ def diffuse(image, pos_busbar):
     return image_c
 
 
-def count_inactive_area(cell_diff):
+def count_area(cell_diff):
     """Count worst-case percentage of inactive area
     Parameters
     ----------
@@ -181,3 +196,39 @@ def count_inactive_area(cell_diff):
     inactive_area = np.zeros(cell_diff.shape).astype(np.uint8)
     inactive_area[cell_diff == 0] = 1
     return inactive_area.sum() / (inactive_area.shape[0] * inactive_area.shape[1])
+
+
+def detect_inactive(mask_crack, mask_busbar, extend_kernel=(10, 100)):
+    """Detect the worst-case isolated area and calculate its proportion
+    Parameters
+    ----------
+    mask_crack: array
+    Mask of cracks
+
+    mask_busbar: array
+    Masks of busbars
+
+    extend_kernel: list or tuple
+    Kernel used to do morphological operation to extend busbar. Details available on
+    https://docs.opencv.org/4.5.4/d9/d61/tutorial_py_morphological_ops.html
+
+    Returns
+    -------
+    inactive_area: array
+    Binary isolated area
+
+    inactive_prop: float
+    percentage of inactive area. Not in the form of %
+    """
+    ske_crack = skeleton_crack(mask_crack)
+    ske_busbar = extend_busbar(mask_busbar, kernel_size=extend_kernel)
+    pos_busbar = locate_busbar(ske_busbar)
+    ske_cell = skeleton_cell(ske_crack, pos_busbar)
+    cell_diff = diffuse(ske_cell, pos_busbar)
+
+    inactive_area = np.zeros(cell_diff.shape).astype(np.uint8)
+    inactive_area[cell_diff == 0] = 1
+    inactive_prop = inactive_area.sum() / (inactive_area.shape[0] * inactive_area.shape[1])
+
+    return inactive_area, inactive_prop
+
