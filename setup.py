@@ -26,7 +26,7 @@ setup(
         "numpy==1.19.2",
         "tqdm==4.56.0",
         "torch==1.6.0",
-        "Pillow==8.3.2",
+        "Pillow==9.0.0",
         "scikit_learn==0.24.2",
     ],
     license="BSD",
