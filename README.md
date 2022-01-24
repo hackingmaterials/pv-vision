@@ -149,4 +149,4 @@ We also provide you with packages of analyzing your own data. The tutorials of u
 1. ~~We will upload some EL images for users to practice after we get approval from our data provider.~~ **Done**
 2. ~~We will improve the user experience of our tools. We will do more Object-oriented programming (OOP) in the future version.~~ **Done**
 3. We also developed algoritms of extracting cracks from solar cells. We will integrate the algorithms with `PV-Vision`.
-4. We want to predict the worst degradation amount based on the existing crack pattern. This will also be integrated into `PV-Vision`.
+4. ~~We want to predict the worst degradation amount based on the existing crack pattern. This will also be integrated into `PV-Vision`.~~ **Done**
