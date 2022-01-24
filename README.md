@@ -16,7 +16,7 @@ Currently the model weights are:
 
 1. In folder "crack_extraction":
 
-   Model "detect_cracks_unet_v3" is used for predicting the pixels that belong to cracks, busbars, etc. using semantic segmentation.
+   Model "unet_oversample_low" is used for predicting the pixels that belong to cracks, busbars, etc. using semantic segmentation.
 
 2. In folder "defective_cell\_detection":
 
