@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
-
+import matplotlib.pyplot as plt
 
 
 def linear(x, a, b):
@@ -22,7 +22,7 @@ def linear(x, a, b):
     return a * x + b
 
 
-def linear_regression(inxes, lines):
+def linear_regression(inxes, lines, outlier_filter=False, threshold=0.3):
     """Linear regression: f = ax + b. Return multiple fitted lines. After detect_edge, do linear fitting to
     return the final parameters(a and b) of edges.
 
@@ -34,6 +34,12 @@ def linear_regression(inxes, lines):
     lines: list, or array
     Each line in lines represents values of f.
 
+    outlier_filter: bool
+    If true, outliers will be filtered
+
+    threshold: float
+    Filter threshold
+
     Returns
     -------
     ab_s: list
@@ -43,12 +49,84 @@ def linear_regression(inxes, lines):
 
     for line in lines:
         ab, _ = curve_fit(linear, inxes, line)
-        # line_fit = ab[0]*inxes+ab[1]
+        if outlier_filter:
+            line_fit = ab[0] * inxes + ab[1]
+            mse = np.mean((line - line_fit) ** 2)
+            cook_distances = []
+            outlier_inx = []
+            for inx, element in enumerate(line):
+                inx_i = np.delete(inxes, inx)
+                line_i = np.delete(line, inx)
+                ab_i, _ = curve_fit(linear, inx_i, line_i)
+                line_fit_i = ab_i[0] * inxes + ab_i[1]
+                cook_distance = (np.sum((line_fit - line_fit_i) ** 2)) / mse
+                cook_distances.append(cook_distance)
+                if cook_distance > threshold:
+                    outlier_inx.append(inx)
+            inxes_new = np.delete(inxes, outlier_inx)
+            line_new = np.delete(line, outlier_inx)
+            ab, _ = curve_fit(linear, inxes_new, line_new)
+
         ab_s.append(ab)
 
     ab_s = np.array(ab_s)
 
     return ab_s
+
+
+def detectoutliers(data, rate=1.5, option=1):
+    # may be replaced by a better algorithm
+    """ Detect outliers among peaks(internal edges) of a split.
+    If option == 0, will replace outliers.
+    If option == 1, will remove outliers. (e.g. some extra wrong peaks)
+
+    Parameters
+    ----------
+    data: array
+    Peaks of internal edges
+
+    rate: float
+    Tolerance of good data
+
+    option: int
+    """
+
+    bottom = np.percentile(data, 25)
+    up = np.percentile(data, 75)
+    IQR = up - bottom
+    outlier_step = rate * IQR
+
+    outlier_list = (data < bottom - outlier_step) | (data > up + outlier_step)
+    if option == 0:
+        for inx, flag in enumerate(outlier_list):
+            if flag:
+                left = inx
+                right = inx
+                while outlier_list[left]:
+                    left -= 1
+                    if left <= 0:
+                        left = inx
+                        while outlier_list[left]:
+                            left += 1
+
+                while outlier_list[right]:
+                    right += 1
+                    if right >= len(outlier_list) - 1:
+                        right = inx
+                        while outlier_list[right]:
+                            right -= 1
+                outlier_list[inx] = False
+                data[inx] = (data[left] + data[right]) / 2
+
+        return data
+
+    if option == 1:
+        outlier_list = np.insert(outlier_list, 4, False)
+        for i in range(5, len(outlier_list) - 5):
+            if outlier_list[i]:
+                outlier_list[i] = False
+
+        return (1 - outlier_list).astype(np.bool)
 
 
 def filter_margin(edges, im_length, margin=20):
@@ -79,9 +157,192 @@ def filter_margin(edges, im_length, margin=20):
     return edges
 
 
+def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None):
+    """ Detect vertical edges by segmenting image into horizontal splits
+
+    Parameters
+    ----------
+    image_thre: array
+    Adaptive threshold of raw images
+
+    column: int
+    Number of columns of solar module
+
+    cell_size: int
+    Output cell size in pixel
+
+    thre: float
+    Peak intensity above THRE will be set as 1.
+    Note that the edge's peak intensity should be lowest because edges are black
+
+    split: int
+    Number of splits
+
+    peak_interval: int
+    Distance between each peak. Default is int(cell_size * 0.95)
+
+    Returns
+    -------
+    vline_abs_couple: array
+    Suppose a line is y=a*x+b.
+    Return a and b of a couple edges (left and right of a cell).
+    """
+    height = image_thre.shape[0]
+    end = int(height / split)
+    image_hsplits = np.vsplit(image_thre[: end * split, :], split)  # horizontal splits
+    image_hsplits.append(image_thre[end * split:, :])
+    edge_x = []
+    inx_y = []
+    for inx, im_split in enumerate(image_hsplits):
+        sum_split = np.sum(im_split, axis=0)
+        sum_split = sum_split / np.max(sum_split)
+        sum_split[sum_split > thre] = 1
+
+        if peak_interval is None:
+            peak_interval = int(cell_size * 0.95)
+        peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
+        if len(peak) > column - 2:
+            peak_new = [peak[0]]
+            for i in range(1, len(peak) - 1):
+                if np.abs(peak[i] - peak[i + 1]) < 15:
+                    peak_mean = (peak[i] + peak[i + 1]) / 2
+                    peak_new.append(peak_mean)
+                elif np.abs(peak[i] - peak[i - 1]) > 15:
+                    peak_new.append(peak[i])
+
+            peak_new.append(peak[-1])
+            peak_new = np.array(peak_new)
+            peak_new_a = np.delete(peak_new, 0)
+            peak_new_b = np.delete(peak_new, -1)
+            peak_new_detect = peak_new[detectoutliers(np.abs(peak_new_a - peak_new_b), option=1)]
+
+            if len(peak_new_detect) == 1 + column:
+                edge_x.append(peak_new_detect)
+                inx_mean = ((2 * inx + 1) * (image_thre.shape[0] / split) - 1) / 2
+                inx_y.append(inx_mean)
+    edge_x = np.array(edge_x)
+
+    vlines = list(zip(*edge_x))  # line parallel to y axis
+    vlines = np.array(vlines)
+    inx_y = np.array(inx_y)
+    # for lines in vlines:
+    #    lines_new = self.detectoutliers(lines, option=0)
+    #    while np.std(lines_new) > 15:
+    #        lines_new = self.detectoutliers(lines, rate=1, option=0)
+
+    # v_abs = []
+    # for verticaline in vlines:
+    #    ab, _ = curve_fit(self.linear, inx_y, verticaline) # x = ay + b
+    #    v_abs.append(ab)
+    v_abs = linear_regression(inx_y, vlines, outlier_filter=True)
+    # temp1 = v_abs.copy()
+    temp1 = np.delete(v_abs, -1, 0)
+    # temp2 = v_abs.copy()
+    temp2 = np.delete(v_abs, 0, 0)
+
+    vline_abs_couple = np.array(list(zip(temp1, temp2)))
+    # vline_abs = [(v_abs[i],v_abs[i+1]) for i in range(0, len(v_abs), 2)] # put edges of each cell into a tuple
+
+    return vline_abs_couple
+
+
+def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50, peak_interval=None):
+    """ Detect horizontal edges by segmenting image into vertical splits
+
+    Parameters
+    ---------
+    image_thre: array
+    Adaptive threshold of raw images
+
+    row: int
+    Number of rows of solar module
+
+    busbar: int
+    Number of busbars of a solar cell
+
+    cell_size: int
+    Output cell size in pixel
+
+    thre: float
+    Peak intensity above THRE will be set as 1.
+    Note that the edge's peak intensity should be lowest because edges are black
+
+    split: int
+    Number of splits
+
+    peak_interval: int
+    Distance between each peak. Default is int(cell_size * 0.95)
+
+    Returns
+    -------
+    hline_abs_couple: array
+    Suppose a line is y=a*x+b.
+    Return 'a' and 'b' of a couple edges (top and bottom of a cell).
+        """
+    width = image_thre.shape[1]
+    end = int(width / split)
+    image_vsplits = np.hsplit(image_thre[:, :end * split], split)  # vertical splits
+    image_vsplits.append(image_thre[:, end * split:])
+
+    edge_y = []
+    inx_x = []
+    for inx, im_split in enumerate(image_vsplits):
+        sum_split = np.sum(im_split, axis=1)
+        sum_split = sum_split / np.max(sum_split)
+        sum_split[sum_split > thre] = 1
+
+        if peak_interval is None:
+            peak_interval = int(cell_size / (busbar + 1) * 0.5)
+        peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
+        if len(peak) >= row * (busbar + 1) - 1:
+            peak_new = [peak[0]]
+            for i in range(1, len(peak) - 1):
+                if np.abs(peak[i] - peak[i + 1]) < 15:
+                    peak_mean = (peak[i] + peak[i + 1]) / 2
+                    peak_new.append(peak_mean)
+                elif np.abs(peak[i] - peak[i - 1]) > 15:
+                    peak_new.append(peak[i])
+
+            peak_new.append(peak[-1])
+            peak_new = np.array(peak_new)
+            peak_new_a = np.delete(peak_new, 0)
+            peak_new_b = np.delete(peak_new, -1)
+            peak_new_detect = peak_new[detectoutliers(np.abs(peak_new_a - peak_new_b), rate=0.5, option=1)]
+
+            if len(peak_new_detect) == (busbar + 1) * row + 1:
+                edge_y.append(peak_new_detect)
+                inx_mean = ((2 * inx + 1) * (image_thre.shape[1] / split) - 1) / 2
+                inx_x.append(inx_mean)
+
+    edge_y = np.array(edge_y)
+
+    hlines = list(zip(*edge_y))
+    hlines = np.array(hlines)
+    inx_x = np.array(inx_x)
+    # for lines in hlines:
+    #    lines_new = self.detectoutliers(lines, option=0)
+    #    while np.std(lines_new) > 10:
+    #        lines_new = self.detectoutliers(lines, rate=1, option=0)
+
+    # hb_abs = [] # all lines including busbar
+    hb_abs = linear_regression(inx_x, hlines, outlier_filter=True)
+    hline_abs_couple = []  # all lines excluding busbar
+
+    # for horizonline in hlines:
+    #    ab, _ = curve_fit(self.linear, inx_x, horizonline) # y = ax + b
+    #    hb_abs.append(ab)
+
+    hline_abs_couple = [(hb_abs[(busbar + 1) * i], hb_abs[(busbar + 1) * (i + 1)]) for i in range(row)]
+    # hline_abs = [(hb_abs[(4+1)*i],hb_abs[(4+1)*(i+1)]) for i in range(6)]
+    # hline_abs = [(hb_abs[(self.busbar+2)*i],hb_abs[(self.busbar+2)*(i+1)-1]) for i in range(self.row)]
+
+    return hline_abs_couple
+
+
 def detect_edge(image, peaks_on=0, cell_size=30, split_size=10, im_size=[300, 600], row_col=[8, 16], margin=20):
     """Detect the inner edges of a solar module. Split the solar module first, then detect position of
     edges in each split.
+    Note that the solar module is already perspectively transformed.
 
     Parameters
     ----------
@@ -245,6 +506,24 @@ def couple_edges(lines_ab, length, displacement=0, add_edge=True):
     return np.array(lines_couple_new)
 
 
+def correction(lines, displacement):
+    """The first line in the tuple moves to negative direction,
+    the second to positive direction.
+
+    Parameters
+    ----------
+    lines: list or array
+
+    """
+    lines_new = []
+    for couple in lines:
+        minus = displace(couple[0], -displacement)
+        plus = displace(couple[1], displacement)
+        lines_new.append((minus, plus))
+
+    return lines_new
+
+
 def cross(vline, hline):
     """Intersction of edges
 
@@ -287,7 +566,8 @@ def perspective_transform(image, src, size):
     return warped
 
 
-def segment_cell(image, abs_x_couple, abs_y_couple, cellsize=32, save_path=None):
+def segment_cell(image, hline_abs_couple, vline_abs_couple, cellsize,
+                 save_path=None, displacement=None):
     """Crop out solar cells from a module
 
     Parameters
@@ -295,7 +575,7 @@ def segment_cell(image, abs_x_couple, abs_y_couple, cellsize=32, save_path=None)
     image: array
     Perspective transformed image of solar module
 
-    abs_x_couple, abs_y_couple: array
+    hline_abs_couple, vline_abs_couple,: array
     Couple of horizontal edges, vertical edges
 
     cellsize: int
@@ -304,14 +584,21 @@ def segment_cell(image, abs_x_couple, abs_y_couple, cellsize=32, save_path=None)
     save_path: str or pathlib.PosixPath
     Path to store the output
 
+    displacement
+    If displace, then move edge couples with displacement
+
     Returns
     -------
     cells: array
     Images of cropped cells
     """
+    if displacement:
+        hline_abs_couple = correction(hline_abs_couple, displacement)
+        vline_abs_couple = correction(vline_abs_couple, displacement)
+
     cells = []
-    for i, hline_ab in enumerate(abs_y_couple):
-        for j, vline_ab in enumerate(abs_x_couple):
+    for i, hline_ab in enumerate(hline_abs_couple):
+        for j, vline_ab in enumerate(vline_abs_couple):
             xy = []
             for hab in hline_ab:
                 for vab in vline_ab:
@@ -326,6 +613,39 @@ def segment_cell(image, abs_x_couple, abs_y_couple, cellsize=32, save_path=None)
                 cv.imwrite(str(save_path / (str(i) + str(j) + '.png')), warped)
 
     return cells
+
+
+def plot_edges(image, hline_abs_couple, vline_abs_couple, displacement=1, linewidth=1):
+    """Plot the detected edges
+
+    Parameters
+    ----------
+    image: array
+    Raw image
+
+    hline_abs_couple, vline_abs_couple: list or array
+    a and b of edge couples
+
+    displacement: int
+    Displace detected edges
+
+    linewidth: int
+    Width of plotted lines
+    """
+    newhline_abs = correction(hline_abs_couple, displacement)
+    newvline_abs = correction(vline_abs_couple, displacement)
+
+    plt.imshow(image, cmap='gray')
+    x = np.array(range(image.shape[1]))
+    y = np.array(range(image.shape[0]))
+
+    for h_ab in newhline_abs:
+        plt.plot(x, h_ab[0][0] * x + h_ab[0][1], linewidth=linewidth, linestyle='--', color='r')
+        plt.plot(x, h_ab[1][0] * x + h_ab[1][1], linewidth=linewidth, linestyle='--', color='r')
+
+    for v_ab in newvline_abs:
+        plt.plot(v_ab[0][0] * y + v_ab[0][1], y, linewidth=linewidth, linestyle='--', color='r')
+        plt.plot(v_ab[1][0] * y + v_ab[1][1], y, linewidth=linewidth, linestyle='--', color='r')
 
 
 def coordinate2inx(coordinate, row=8, col=16, im_shape=[300, 600]):

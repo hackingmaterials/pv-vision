@@ -6,6 +6,49 @@ from scipy import signal
 import json
 
 
+def image_threshold(image, blur=5, blocksize=11, threshold=None, adaptive=False):
+    """Return an binary image. AdaptiveThreshold will keep skeleton of solar modules,
+    threshold will only keep contour.
+
+    Parameters
+    ----------
+    image: array
+    Image of solar modules
+
+    blur: int
+    Block size in cv.medianBlur
+
+    blocksize: int
+    blocksize in cv.adaptiveThreshold
+
+    threshold: int
+    Threshold value in cv.threshold.
+    Pixels above this value will be set 255, and below will be 0.
+    If not given, first 10% of the image grayscale value will be used.
+
+    adaptive: bool
+    if true, adaptiveThreshold will be used # need to change inverse binary into binary
+
+    Returns
+    -------
+    image_thre: array
+    Binary image
+    """
+    # image_eq = cv.equalizeHist(image_resize)
+    image_blur = cv.medianBlur(image, blur)
+    if adaptive:
+        image_thre = cv.adaptiveThreshold(image_blur, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                          cv.THRESH_BINARY, blocksize, 2)
+    else:
+        if threshold is None:
+            threshold = np.quantile(image_blur, 0.1)
+        _, image_thre = cv.threshold(image_blur, threshold, 255, cv.THRESH_BINARY)
+
+    image_thre = cv.medianBlur(image_thre, 1)
+
+    return image_thre
+
+
 def base64_2_mask(s):
     """decode the masks from supervisely
 
@@ -76,6 +119,8 @@ def load_mask(path, image, mask_name='module_unet'):
 
 def find_intersection(mask_part, houghlinePara=50):
     """Find the intersection of two edges. Edges detected by houghline method.
+    Here we use corner part of a mask to make better detection. (Only one corner need
+    to be detected in a corner part).
 
     Parameters
     ----------
@@ -122,10 +167,10 @@ def find_intersection(mask_part, houghlinePara=50):
     theta2 = np.mean(thetas2)
     rho2 = np.mean(rhos2)
 
-    k1 = -1/np.tan(theta1)
-    k2 = -1/np.tan(theta2)
-    b1 = rho1*np.sin(theta1)-k1*rho1*np.cos(theta1)
-    b2 = rho2*np.sin(theta2)-k2*rho2*np.cos(theta2)
+    k1 = -1 / np.tan(theta1)
+    k2 = -1 / np.tan(theta2)
+    b1 = rho1 * np.sin(theta1) - k1 * rho1 * np.cos(theta1)
+    b2 = rho2 * np.sin(theta2) - k2 * rho2 * np.cos(theta2)
 
     x_cross = (b2-b1) / (k1-k2)
     y_cross = (k1 * b2 - k2 * b1) / (k1 - k2)
@@ -211,10 +256,10 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0, corner
             ys.append(y_cross)
 
     # sort out the corners
-    xs[1] += x_m-center_displace
-    ys[2] += y_m-center_displace
-    xs[3] += x_m-center_displace
-    ys[3] += y_m-center_displace
+    xs[1] += x_m - center_displace
+    ys[2] += y_m - center_displace
+    xs[3] += x_m - center_displace
+    ys[3] += y_m - center_displace
 
     xs[0] -= displace
     ys[0] -= displace
@@ -401,8 +446,16 @@ def find_module_corner2(mask, mode=0):
     """
     blur = cv.blur(mask, (6, 6))
     contours, _ = cv.findContours(blur, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    cnt_approx = cv.approxPolyDP(contours[0], 8, True)
-    convex = cv.convexHull(contours[0])
+
+    inx = 0
+    length = 0
+    for i, cnt in enumerate(contours):
+        if length < len(cnt):
+            length = len(cnt)
+            inx = i
+
+    cnt_approx = cv.approxPolyDP(contours[inx], 8, True)
+    convex = cv.convexHull(contours[inx])
     conv_approx = cv.approxPolyDP(convex, 8, True)
 
     if mode == 0:

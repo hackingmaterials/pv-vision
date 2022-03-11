@@ -5,13 +5,14 @@ import cv2 as cv
 from pathlib import Path
 
 
-class SolarModule:
+class AbstractModule:
     """Parent class. This class provide basic methods of processing a module image"""
-    def __init__(self, image, row, col):
+    def __init__(self, image, row, col, busbar):
         self._image = image
         self._size = image.shape
         self._row = row
         self._col = col
+        self._busbar = busbar
 
     @property
     def image(self):
@@ -29,14 +30,31 @@ class SolarModule:
         return self._size
 
     @property
-    def row_col(self):
+    def row(self):
         """The number of row and col of the module"""
-        return [self._row, self._col]
+        return self._row
 
-    @row_col.setter
-    def row_col(self, row, col):
-        self._col = col
+    @row.setter
+    def row(self, row):
         self._row = row
+
+    @property
+    def col(self):
+        """The number of row and col of the module"""
+        return self._col
+
+    @row.setter
+    def col(self, col):
+        self._col = col
+
+    @property
+    def busbar(self):
+        """The number of busbars"""
+        return self._busbar
+
+    @busbar.setter
+    def busbar(self, busbar):
+        self._busbar = busbar
 
     def _reset(self, new_image, new_row, new_col):
         """Reset the image in this instance"""
@@ -151,13 +169,70 @@ class SolarModule:
         cv.imwrite(str(save_path), self._image)
 
 
-class MaskModule(SolarModule):
+class SplitModule(AbstractModule):
+    """Raw module image class that use splitting to crop cells"""
+    def __init__(self, image, row, col, busbar):
+        super().__init__(image, row, col, busbar)
+        self._cells = None
+        self._vline_abs = None
+        self._hline_abs = None
+
+    @property
+    def cells(self):
+        if self._cells is None:
+            print("Cells are not cropped")
+
+        return self._cells
+
+    def crop_cell(self, cellsize, hsplit=100, hthre=0.8, vsplit=50, vthre=0.6, savepath=None, displace=None):
+        """Crop cells
+
+        Parameters
+        ----------
+        cellsize: int
+        Edge size of a cell. This can be an estimated value from raw module image.
+
+        hsplit, vplit: int
+        Number of horizontal/vertical splits
+
+        hthre, vthre: float
+        Peaks will be set as 1 above this threshold
+
+        savepath: str
+        Save path
+
+        displace: int
+        Displace the detected lines
+
+        Returns
+        -------
+        cells: array
+        """
+
+        image_thre = transform.image_threshold(self.image, adaptive=True)
+
+        self._vline_abs = seg.detect_vertical_lines(image_thre, cell_size=cellsize,
+                                              column=self.col, thre=hthre, split=hsplit)
+        self._hline_abs = seg.detect_horizon_lines(image_thre, row=self.row, busbar=3,
+                                             cell_size=cellsize, thre=vthre, split=vsplit)
+
+        self._cells = seg.segment_cell(self.image, self._hline_abs, self._vline_abs, cellsize, savepath, displace)
+
+        return self._cells
+
+    def plot_edges(self, linewidth=1):
+        seg.plot_edges(self.image, self._hline_abs, self._vline_abs, linewidth)
+
+
+class MaskModule(AbstractModule):
     """Raw module image class that has a mask of target modules"""
-    def __init__(self, image, row, col):
-        super().__init__(image, row, col)
+    def __init__(self, image, row, col, busbar):
+        super().__init__(image, row, col, busbar)
         self._mask = None
         self._mask_center = None
         self._corners = None
+        self._transformed = None
+        self._cells = None
 
     @property
     def mask(self):
@@ -180,9 +255,26 @@ class MaskModule(SolarModule):
 
         return self._corners
 
-    def load_mask(self, mask_path, output=False):
-        self._mask, self._mask_center = \
-            transform.load_mask(mask_path, self._image, 'module_unet')
+    @property
+    def transformed_image(self):
+        if self._transformed is None:
+            print("Module is not transformed")
+
+        return self._transformed
+
+    @property
+    def cells(self):
+        if self._cells is None:
+            print("Cells are not cropped")
+
+        return self._cells
+
+    def load_mask(self, mask_path=None, output=False, blur=5, blocksize=11, threshold=None):
+        if mask_path is None:
+            self._mask = transform.image_threshold(self.image, blur, blocksize, threshold)
+        else:
+            self._mask, self._mask_center = \
+                transform.load_mask(mask_path, self._image, 'module_unet')
 
         if output:
             return self._mask, self._mask_center
@@ -257,7 +349,7 @@ class MaskModule(SolarModule):
         if output:
             return self._corners
 
-    def transform(self, width=600, height=300, img_only=False):
+    def transform(self, width=600, height=300, img_only=True):
         """Do perspective transform on the solar module
 
         Parameters
@@ -277,21 +369,28 @@ class MaskModule(SolarModule):
             print("Corners are not detected")
         else:
             wrap = transform.perspective_transform(self._image, self._corners, width, height)
+            self._transformed = wrap
             if img_only:
                 return wrap
             else:
                 return TransformedModule(wrap, self._row, self._col)
 
+    def crop_cell(self, cell_size):
+        self._cells = TransformedModule(self._transformed, self._row, self._col).crop_cell(cell_size)
 
-class TransformedModule(SolarModule):
+        return self._cells
+
+
+class TransformedModule(AbstractModule):
     """Solar module class after perspective transformation"""
-    def __init__(self, image, row, col):
-        super().__init__(image, row, col)
+
+    def __init__(self, image, row, col, busbar):
+        super().__init__(image, row, col, busbar)
         if len(self._size) != 2:
             super().remove_channel(in_place=True)
-    
-    @staticmethod
-    def is_transformed(image, x_min, y_min):
+
+    # @staticmethod
+    def is_transformed(self, x_min, y_min):
         """Determine whether the module is properly transformed by checking the number of internal edges.
 
         Parameters
@@ -306,19 +405,19 @@ class TransformedModule(SolarModule):
         -------
         bool
         """
-        peak_x, peak_y = transform.find_inner_edge(image)
+        peak_x, peak_y = transform.find_inner_edge(self._image)
         return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
 
-    def crop_cell(self):
-        splits_inx_x, edgelist_x = seg.detect_edge(self._image, peaks_on=0)
-        abs_x = seg.linear_regression(splits_inx_x, edgelist_x)
-        splits_inx_y, edgelist_y = seg.detect_edge(self._image, peaks_on=1)
-        abs_y = seg.linear_regression(splits_inx_y, edgelist_y)
+    def crop_cell(self, cell_size):
+        vinx_split, vline_split = seg.detect_edge(self._image, peaks_on=0)
+        vline_abs = seg.linear_regression(vinx_split, vline_split)
+        hinx_split, hline_split = seg.detect_edge(self._image, peaks_on=1)
+        hline_abs = seg.linear_regression(hinx_split, hline_split)
 
-        abs_x_couple = seg.couple_edges(abs_x, length=self.size[1])
-        abs_y_couple = seg.couple_edges(abs_y, length=self.size[0])
+        hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[1])
+        vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[0])
 
-        return np.array(seg.segment_cell(self.image, abs_x_couple, abs_y_couple))
+        return np.array(seg.segment_cell(self.image, hline_abs_couple, vline_abs_couple, cellsize=cell_size))
 
     def classify_cells(self, ann_path, defects_inx_dic):
         """Classify solar cells based on the class of the annotation of bounding box on the solar module
@@ -380,9 +479,3 @@ class TransformedModule(SolarModule):
         Path to store the output
         """
         seg.write_cells(single_cells, defects_inx, defect2folder, name, save_path)
-
-
-
-
-
-
