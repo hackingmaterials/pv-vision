@@ -21,9 +21,10 @@ def image_threshold(image, blur=5, blocksize=11, threshold=None, adaptive=False)
     blocksize: int
     blocksize in cv.adaptiveThreshold
 
-    threshold: int
+    threshold: int or float
     Threshold value in cv.threshold.
     Pixels above this value will be set 255, and below will be 0.
+    If threshold < 1, first threshold (%) of the image grayscale value will be used.
     If not given, first 10% of the image grayscale value will be used.
 
     adaptive: bool
@@ -42,6 +43,8 @@ def image_threshold(image, blur=5, blocksize=11, threshold=None, adaptive=False)
     else:
         if threshold is None:
             threshold = np.quantile(image_blur, 0.1)
+        elif threshold < 1:
+            threshold = np.quantile(image_blur, threshold)
         _, image_thre = cv.threshold(image_blur, threshold, 255, cv.THRESH_BINARY)
 
     image_thre = cv.medianBlur(image_thre, 1)

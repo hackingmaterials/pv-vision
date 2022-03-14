@@ -43,7 +43,7 @@ class AbstractModule:
         """The number of row and col of the module"""
         return self._col
 
-    @row.setter
+    @col.setter
     def col(self, col):
         self._col = col
 
@@ -269,15 +269,36 @@ class MaskModule(AbstractModule):
 
         return self._cells
 
-    def load_mask(self, mask_path=None, output=False, blur=5, blocksize=11, threshold=None):
+    def load_mask(self, mask_path=None, output=False, blur=5, thre=None):
+        """Load the mask of a module.
+        If the background of the image looks good, you don't need to provide masks explicitly.
+        Otherwise, you should provide masks predicted from neural networks
+
+        Parameters
+        ----------
+        mask_path: str
+        If provided, then mask is loaded explicitly. Otherwise, this method will detect masks automatically.
+
+        output: bool
+        If true, return mask and mask center
+
+        blur: int
+        Blur filter size in cv.medianBlur
+
+        thre: int or float
+        Threshold value in cv.threshold.
+        Pixels above this value will be set 255, and below will be 0.
+        If threshold < 1, first threshold (%) of the image grayscale value will be used.
+        If not given, first 10% of the image grayscale value will be used.
+        """
         if mask_path is None:
-            self._mask = transform.image_threshold(self.image, blur, blocksize, threshold)
+            self._mask = transform.image_threshold(image=self.image, blur=blur, threshold=thre)
         else:
             self._mask, self._mask_center = \
                 transform.load_mask(mask_path, self._image, 'module_unet')
 
         if output:
-            return self._mask, self._mask_center
+            return self._mask
 
     def corner_detection_line(self, dist=200, displace=0, method=0,
                               corner_center=False, center_displace=10, output=False):
@@ -349,7 +370,7 @@ class MaskModule(AbstractModule):
         if output:
             return self._corners
 
-    def transform(self, width=600, height=300, img_only=True):
+    def transform(self, width=None, height=None, cellsize=None, img_only=True):
         """Do perspective transform on the solar module
 
         Parameters
@@ -357,8 +378,12 @@ class MaskModule(AbstractModule):
         width, height: int
         Width/height of transformed image
 
+        cellsize: int
+        Edge length of a cell
+
         img_only: bool
-        If true, only return the image of transformed module. Otherwise return a transformed module instance
+        If true, only return the image of transformed module.
+        Otherwise return a transformed module instance
 
         Returns
         -------
@@ -366,19 +391,54 @@ class MaskModule(AbstractModule):
         Transformed solar module
         """
         if self._corners is None:
-            print("Corners are not detected")
+            print("Corners are not detected. Start automatic detection")
+            return None
+            #self._corners = self.corner_detection_cont(mode=1)
+
+        if cellsize:
+            width = self.col * cellsize
+            height = self.row * cellsize
+        wrap = transform.perspective_transform(self._image, self._corners, width, height)
+        self._transformed = wrap
+        if img_only:
+            return wrap
         else:
-            wrap = transform.perspective_transform(self._image, self._corners, width, height)
-            self._transformed = wrap
-            if img_only:
-                return wrap
-            else:
-                return TransformedModule(wrap, self._row, self._col)
+            return TransformedModule(wrap, self._row, self._col, self._busbar)
 
-    def crop_cell(self, cell_size):
-        self._cells = TransformedModule(self._transformed, self._row, self._col).crop_cell(cell_size)
+    def is_transformed(self, x_min, y_min):
+        """Determine whether the module is properly transformed by checking the number of internal edges.
 
-        return self._cells
+        Parameters
+        ----------
+        image: array
+        The image that needs to be checked
+
+        x_min, y_min: int
+        The threshold of the number of detected internal edges. X means col and y means row
+
+        Returns
+        -------
+        bool
+        """
+        res = TransformedModule(self._transformed, self._row,
+                                self._col, self.busbar).is_transformed(x_min, y_min)
+        return res
+
+    def crop_cell(self, cellsize, vl_interval=None, vl_split_size=None,
+                  hl_interval=None, hl_split_size=None, margin=None):
+        vinx_split, vline_split = seg.detect_edge(self._transformed, row_col=[self.row, self.col], cell_size=cellsize,
+                                                  busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
+                                                  peak_interval=vl_interval, margin=margin)
+        vline_abs = seg.linear_regression(vinx_split, vline_split)
+        hinx_split, hline_split = seg.detect_edge(self._transformed, row_col=[self.row, self.col], cell_size=cellsize,
+                                                  busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
+                                                  peak_interval=hl_interval, margin=margin)
+        hline_abs = seg.linear_regression(hinx_split, hline_split)
+
+        hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[1])
+        vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[0])
+
+        return np.array(seg.segment_cell(self._transformed, hline_abs_couple, vline_abs_couple, cellsize=cellsize))
 
 
 class TransformedModule(AbstractModule):
@@ -408,16 +468,21 @@ class TransformedModule(AbstractModule):
         peak_x, peak_y = transform.find_inner_edge(self._image)
         return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
 
-    def crop_cell(self, cell_size):
-        vinx_split, vline_split = seg.detect_edge(self._image, peaks_on=0)
+    def crop_cell(self, cellsize, vl_interval=None, vl_split_size=None,
+                  hl_interval=None, hl_split_size=None, margin=None):
+        vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+                                                  busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
+                                                  peak_interval=vl_interval, margin=margin)
         vline_abs = seg.linear_regression(vinx_split, vline_split)
-        hinx_split, hline_split = seg.detect_edge(self._image, peaks_on=1)
+        hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+                                                  busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
+                                                  peak_interval=hl_interval, margin=margin)
         hline_abs = seg.linear_regression(hinx_split, hline_split)
 
         hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[1])
         vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[0])
 
-        return np.array(seg.segment_cell(self.image, hline_abs_couple, vline_abs_couple, cellsize=cell_size))
+        return np.array(seg.segment_cell(self.image, hline_abs_couple, vline_abs_couple, cellsize=cellsize))
 
     def classify_cells(self, ann_path, defects_inx_dic):
         """Classify solar cells based on the class of the annotation of bounding box on the solar module
