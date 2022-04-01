@@ -72,7 +72,38 @@ def base64_2_mask(s):
     return mask
 
 
-def load_mask(path, image, mask_name='module_unet'):
+def has_mask(mask_name, path=None, data=None):
+    """Check if mask exists
+    Parameters
+    ----------
+    mask_name: str
+    The annotation name of the mask.
+
+    path: str or pathlib.PosixPath
+    The path of annotation json file
+
+    data: dict
+    If provided, will not open path
+
+    Returns
+    -------
+    If exist, return the index in objects list
+    If not, return False
+    """
+    if path is None and data is None:
+        raise ValueError("Mask file not provided.")
+    if path:
+        with open(path, 'r') as file:
+            data = json.load(file)
+    
+    for inx, obj in enumerate(data["objects"]):
+        if obj['classTitle'] == mask_name:
+            return inx
+    
+    return False
+
+
+def load_mask(path, image, mask_name='module_unet', center=True):
     """Load the image of mask
 
     Parameters
@@ -86,6 +117,9 @@ def load_mask(path, image, mask_name='module_unet'):
     mask_name: str
     The annotation name of the mask. Default is 'module_unet'.
 
+    center: bool
+    If True, return mask center.
+
     Returns
     -------
     mask: array
@@ -96,14 +130,27 @@ def load_mask(path, image, mask_name='module_unet'):
     """
     with open(path, 'r') as file:
         data = json.load(file)
-    if len(data["objects"]) == 1:
-        code = data["objects"][0]["bitmap"]["data"]
-        origin = data["objects"][0]["bitmap"]["origin"]
+    # if len(data["objects"]) == 0:
+    #    return None
+        # code = data["objects"][0]["bitmap"]["data"]
+        # origin = data["objects"][0]["bitmap"]["origin"]
+    # else:
+    #    flag = True
+    #    for obj in data["objects"]:
+    #        if obj['classTitle'] == mask_name:
+    inx = has_mask(mask_name, data=data)
+    if inx is not False:
+        obj = data["objects"][inx]
+        code = obj["bitmap"]["data"]
+        origin = obj["bitmap"]["origin"]
     else:
-        for obj in data["objects"]:
-            if obj['classTitle'] == mask_name:
-                code = obj["bitmap"]["data"]
-                origin = obj["bitmap"]["origin"]
+        mask = np.zeros((image.shape[0], image.shape[1]))
+        mask = mask.astype('uint8')
+        mask_center = np.array([mask.shape[1]/2, mask.shape[0]/2])
+        if center:
+            return mask, mask_center
+        else:
+            return mask
     mask = base64_2_mask(code)
     mask_center = np.array([mask.shape[1]/2, mask.shape[0]/2])
     mask_center += origin
@@ -117,7 +164,10 @@ def load_mask(path, image, mask_name='module_unet'):
     right = np.zeros((mask4.shape[0], image.shape[1] - mask4.shape[1]))
     mask5 = np.hstack((mask4, right))
 
-    return mask5.astype('uint8'), mask_center.astype(int)
+    if center:
+        return mask5.astype('uint8'), mask_center.astype(int)
+    else:
+        return mask5.astype('uint8')
 
 
 def find_intersection(mask_part, houghlinePara=50):
@@ -281,7 +331,7 @@ def find_module_corner(mask, mask_center, dist=200, displace=0, method=0, corner
     return np.array(corners_order)
 
 
-def perspective_transform(image, src, sizex, sizey):
+def perspective_transform(image, src, sizex, sizey, rotate=True):
     """Do perspective transform on the solar modules. Orientation of the input module is auto-detected. The output
     module has short side vertically arranged and long side horizontally arranged.
 
@@ -296,16 +346,24 @@ def perspective_transform(image, src, sizex, sizey):
     sizex, sizey: int
     size of the output image. x is the long side and y is the short side.
 
+    rotate: bool
+    If true, auto-detection of orientation is on.
+
     Returns
     -------
     warped: array
     Transformed image of solar module
     """
     src = np.float32(src)
-    if np.sum((src[0] - src[2])**2) <= np.sum((src[0] - src[1])**2):
-        dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
-    else:
+    
+    if rotate and np.sum((src[0] - src[2])**2) > np.sum((src[0] - src[1])**2):
         dst = np.float32([(0, sizey), (0, 0), (sizex, sizey), (sizex, 0)])
+    else:
+        dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
+    #if np.sum((src[0] - src[2])**2) <= np.sum((src[0] - src[1])**2):
+    #    dst = np.float32([(0, 0), (sizex, 0), (0, sizey), (sizex, sizey)])
+    #else:
+        
     M = cv.getPerspectiveTransform(src, dst)
 
     warped = cv.warpPerspective(image, M, (sizex, sizey))
@@ -441,6 +499,7 @@ def find_module_corner2(mask, mode=0):
     mode == 1: detect corners of the approximated convex of module
     mode == 2: detect corners of the approximated contour of the module
     mode == 3: detect corners of the blurred mask of the module
+    mode == 4: detect corners using boudingRect
 
     Returns
     -------
@@ -456,6 +515,13 @@ def find_module_corner2(mask, mode=0):
         if length < len(cnt):
             length = len(cnt)
             inx = i
+
+    if mode == 4:
+        rect = cv.minAreaRect(contours[inx])
+        corners = cv.boxPoints(rect)
+        corners_sorted = sort_corners(np.array(corners))
+        corners_displaced = np.array([[-1, -1], [1, -1], [-1, 1], [1, 1]]) * 3 + corners_sorted
+        return corners_displaced
 
     cnt_approx = cv.approxPolyDP(contours[inx], 8, True)
     convex = cv.convexHull(contours[inx])
@@ -473,7 +539,7 @@ def find_module_corner2(mask, mode=0):
     elif mode == 3:
         corners = find_polygon_corners(blur)
     else:
-        print("mode must be one of 0, 1, 2")
-        return
+        raise Exception("mode must be one of 0, 1, 2, 3, 4")
+    
     return corners
 

@@ -370,7 +370,7 @@ class MaskModule(AbstractModule):
         if output:
             return self._corners
 
-    def transform(self, width=None, height=None, cellsize=None, img_only=True):
+    def transform(self, width=None, height=None, cellsize=None, auto_rotate=True, img_only=True):
         """Do perspective transform on the solar module
 
         Parameters
@@ -380,6 +380,9 @@ class MaskModule(AbstractModule):
 
         cellsize: int
         Edge length of a cell
+
+        auto_rotate: bool
+        If true, automatically adjust module orientation such that shorter side is vertically aligned.
 
         img_only: bool
         If true, only return the image of transformed module.
@@ -398,8 +401,8 @@ class MaskModule(AbstractModule):
         if cellsize:
             width = self.col * cellsize
             height = self.row * cellsize
-        wrap = transform.perspective_transform(self._image, self._corners, width, height)
-        self._transformed = wrap
+        wrap = transform.perspective_transform(self._image, self._corners, width, height, rotate=auto_rotate)
+        self._transformed = TransformedModule(wrap, self._row, self._col, self._busbar)
         if img_only:
             return wrap
         else:
@@ -420,25 +423,15 @@ class MaskModule(AbstractModule):
         -------
         bool
         """
-        res = TransformedModule(self._transformed, self._row,
-                                self._col, self.busbar).is_transformed(x_min, y_min)
+        res = self._transformed.is_transformed(x_min, y_min)
         return res
 
-    def crop_cell(self, cellsize, vl_interval=None, vl_split_size=None,
+    def crop_cell(self, cellsize, simple=False, vl_interval=None, vl_split_size=None,
                   hl_interval=None, hl_split_size=None, margin=None):
-        vinx_split, vline_split = seg.detect_edge(self._transformed, row_col=[self.row, self.col], cell_size=cellsize,
-                                                  busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
-                                                  peak_interval=vl_interval, margin=margin)
-        vline_abs = seg.linear_regression(vinx_split, vline_split)
-        hinx_split, hline_split = seg.detect_edge(self._transformed, row_col=[self.row, self.col], cell_size=cellsize,
-                                                  busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
-                                                  peak_interval=hl_interval, margin=margin)
-        hline_abs = seg.linear_regression(hinx_split, hline_split)
+        cells = self._transformed.crop_cell(cellsize, simple, vl_interval, vl_split_size,
+                  hl_interval, hl_split_size, margin)
 
-        hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[1])
-        vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[0])
-
-        return np.array(seg.segment_cell(self._transformed, hline_abs_couple, vline_abs_couple, cellsize=cellsize))
+        return cells
 
 
 class TransformedModule(AbstractModule):
@@ -468,16 +461,22 @@ class TransformedModule(AbstractModule):
         peak_x, peak_y = transform.find_inner_edge(self._image)
         return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
 
-    def crop_cell(self, cellsize, vl_interval=None, vl_split_size=None,
+    def crop_cell(self, cellsize, simple=False, vl_interval=None, vl_split_size=None,
                   hl_interval=None, hl_split_size=None, margin=None):
-        vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
-                                                  busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
-                                                  peak_interval=vl_interval, margin=margin)
-        vline_abs = seg.linear_regression(vinx_split, vline_split)
-        hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
-                                                  busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
-                                                  peak_interval=hl_interval, margin=margin)
-        hline_abs = seg.linear_regression(hinx_split, hline_split)
+        if simple:
+            vline_abs = list(zip(np.zeros(self.col - 1), 
+                np.linspace(0, self.size[0], self.col + 1)[1: -1].astype(int)))
+            hline_abs = list(zip(np.zeros(self.row - 1), 
+                np.linspace(0, self.size[1], self.row + 1)[1: -1].astype(int)))
+        else:
+            vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+                                                    busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
+                                                    peak_interval=vl_interval, margin=margin)
+            vline_abs = seg.linear_regression(vinx_split, vline_split)
+            hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+                                                    busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
+                                                    peak_interval=hl_interval, margin=margin)
+            hline_abs = seg.linear_regression(hinx_split, hline_split)
 
         hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[1])
         vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[0])

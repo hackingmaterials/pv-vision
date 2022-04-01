@@ -250,6 +250,17 @@ def detect_peaks(split, direction, cell_size, busbar, thre=0.9, interval=None, m
     return peaks
 
 
+def plot_peaks(n, image, cell_size, busbar, split=None, split_size=None, direction=0, thre=0.9, interval=None, margin=None):
+    splits = split_img(image, split, split_size, direction)
+    split = splits[n]
+    sum_split = np.sum(split, axis=direction)
+    sum_split = sum_split / np.max(sum_split)
+    sum_split[sum_split > thre] = 1
+    peaks = detect_peaks(split, direction, cell_size, busbar, thre, interval, margin)
+    plt.plot(list(range(len(sum_split))), sum_split)
+    plt.scatter(peaks, sum_split[peaks])
+
+
 def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None):
     """ Detect vertical edges by segmenting image into horizontal splits
 
