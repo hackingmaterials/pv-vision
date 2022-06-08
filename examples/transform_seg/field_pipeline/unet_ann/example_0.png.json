@@ -1,0 +1,26 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 512,
+        "width": 640
+    },
+    "objects": [
+        {
+            "description": "",
+            "geometryType": "bitmap",
+            "labelerLogin": "XinChen",
+            "createdAt": "2021-08-18T21:27:58.489Z",
+            "updatedAt": "2021-08-18T21:27:58.489Z",
+            "tags": [],
+            "classTitle": "module_unet",
+            "bitmap": {
+                "data": "eJwBiwJ0/YlQTkcNChoKAAAADUlIRFIAAAG9AAABRgEDAAAAxLXT3QAAAAZQTFRFAAAA////pdmf3QAAAAF0Uk5TAEDm2GYAAAIzSURBVHic7dxNbsIwEIbhRiyy9BF8FB/NPRpH4QgsWVSdIn5USDz2+IWmDZ3sH32f4jiJDcrbW/8xyhao4xFlh9woEEaRPQxkMEI4CIQbCE+OwHCCBxgI4HiGHzCwH44QDgLhhsJEoUAoEG4oFAgHCgXCgcJEYYbwzvVAgTBTKBAmCjOEUSCcNrXCMHVWOAs0wnmgEc5OjREWAm2wEGiCY8GZYKmpBQ4lZ4EbCMuBBlg8NSKfTVh2bag0bcNMoeKaMGlQYNMWjKprQD2wDiuBdaifmjpUrrafg+X5ZIDVwArULu8mrDeVdxXWnQ4bgTpMFGYIW4EqbAVqMLacBptNFdgaCxUGCA2BZVifFzpszAsdWpoWYYbQ1LS0SxIpTCa4g4EFaAucw2Bzc2hsOoOmwX8qtLopNAdOYabQ7CYwUpggDHZ3Dzua3kH7WEyg5eZWgrZbRgF2Nb2FGcK+pjcwUZghDH3uG0YIuwb/KbDXXWHnIH7DDGF/4AUGCiOF2eHK4X5xeHgM9rszBLPqDPueGg4dymUrcEWw+6l6hcGhQ4d/AX4uDuV3YKQwrQdmhw4RJE7gC7JDhw5fBZLVwwmS1cNjMDh06PDZMC4O06vD98Xh1qFDh38JZgqRewSyl0fZOXS4NGTrlSNkyw6H/x3uF4cHhw5fHwYK43pgcujw1WGmkDmHDh06XAtMFMLf9Q/07zI3HxfBsC939jmTTGGg0Npbg839CMMnW8rh+zYs76JsvwAHMyd62ULkswAAAABJRU5ErkJggsg2Cas=",
+                "origin": [
+                    40,
+                    70
+                ]
+            }
+        }
+    ]
+}

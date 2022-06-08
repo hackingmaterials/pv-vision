@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="pv_vision",
-    version="0.0.2",
+    version="0.2.0",
     author="XinChen",
     author_email="chenxin0210@lbl.gov",
     description="Image analysis of defects on solar modules, including automatic detection and power loss prediction",

@@ -261,7 +261,7 @@ def plot_peaks(n, image, cell_size, busbar, split=None, split_size=None, directi
     plt.scatter(peaks, sum_split[peaks])
 
 
-def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None):
+def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None, margin=None):
     """ Detect vertical edges by segmenting image into horizontal splits
 
     Parameters
@@ -308,7 +308,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
         #    peak_interval = int(cell_size * 0.95)
         #peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
         peak = detect_peaks(im_split, direction=0, cell_size=cell_size,
-                            busbar=None, thre=thre, interval=peak_interval)
+                            busbar=None, thre=thre, interval=peak_interval, margin=margin)
         if len(peak) > column - 2:
             peak_new = [peak[0]]
             for i in range(1, len(peak) - 1):
@@ -354,7 +354,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
     return vline_abs_couple
 
 
-def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50, peak_interval=None):
+def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50, peak_interval=None, margin=None):
     """ Detect horizontal edges by segmenting image into vertical splits
 
     Parameters
@@ -403,7 +403,7 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
         #if peak_interval is None:
         #    peak_interval = int(cell_size / (busbar + 1) * 0.5)
         #peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
-        peak = detect_peaks(im_split, 1, cell_size, busbar, thre, peak_interval)
+        peak = detect_peaks(im_split, 1, cell_size, busbar, thre, peak_interval, margin=margin)
         if len(peak) >= row * (busbar + 1) - 1:
             peak_new = [peak[0]]
             for i in range(1, len(peak) - 1):
