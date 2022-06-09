@@ -1,5 +1,6 @@
 # PV-Vision
 **:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
+
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
 ## Citation
 Please cite our papers if you use our tool or dataset.
@@ -14,8 +15,6 @@ Image analysis of defects on solar cells.
 This package allows you to analyze electroluminescene (EL) images of PV module. The methods in this package include image segmentation, crack detection, defective cells classification and crack-power loss correlation. 
 
 You can either use the package `pv_vision` and write your own codes following the instruction in tutorials, or you can directly run our `pipeline.sh`. When `pipeline.sh` is used, `YOLO` model will be applied to do predictions in default. The output will give you the analysis from the model.
-
-
 
 Our trained neural network models can be downloaded [here](https://drive.google.com/drive/folders/1Xxy2QfqJSXIVszi2vwIFnwPb7xDjZyfG?usp=sharing).
 
