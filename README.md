@@ -1,8 +1,15 @@
 # PV-Vision
+**:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
+**:warning: We are updating our tools actively so some of the tutorials may be out of date.**
+## Citation
+Please cite our papers if you use our tool or dataset.
+```
+Will update soon
+``` 
 
 ## Overview
 
- Image analysis of defects on solar cells.
+Image analysis of defects on solar cells.
 
 This package allows you to analyze electroluminescene (EL) images of PV module. The methods in this package include image segmentation, crack detection, defective cells classification and crack-power loss correlation. 
 
@@ -28,14 +35,25 @@ Currently the model weights are:
 
     Model "detect\_contour\_unet\_rgb" and "detect\_contour\_unet\_grayscale" are used for perspective transformation of solar module images using semantic segmantation. "rgb" can be applied to rgb images and "grayscale" can be applied on grayscale images.
 
+## Analyze data
+The tutorials of using `PV-Vision` can be found in folder `tutorials`. The tutorials cover *perspective transformation*, *cell segmentation*, *model inference* and *model output analysis*. 
+
+## Public dataset
+We published one of our datasets as a benchmark for crack segmentation. Images and annotations can be found on [DuraMat datahub](https://datahub.duramat.org/dataset/crack-segmentation)
+
 ## Deploy models
 There are two ways to deply our deep learning models:
 
-### 1. Use Supervisely
+### 1. Use Python
+```
+Will update soon
+```
+
+### 2. Use Supervisely
 
 Upload the model weights to [Supervisely](https://supervise.ly/) and make predictions on this website. The detailed tutorials can be found [here](https://docs.supervise.ly/) and [here](https://github.com/supervisely/supervisely/blob/master/help/tutorials/04_deploy_neural_net_as_api/deploy-model.md#method-1-through-ui).
 
-### 2. Use docker
+### 3. Use docker
 You can also run the models using `docker`. 
 
 First pull the images
@@ -142,11 +160,9 @@ PV-pipeline
         └── img5.png.json
 
 ```
-## Analyze data
-We also provide you with packages of analyzing your own data. The tutorials of using `PV-Vision` can be found in folder `tutorials`. The tutorials cover *perspective transformation*, *cell segmentation*, *model inference* and *model output analysis*. 
 
 ## To do
 1. ~~We will upload some EL images for users to practice after we get approval from our data provider.~~ **Done**
 2. ~~We will improve the user experience of our tools. We will do more Object-oriented programming (OOP) in the future version.~~ **Done**
-3. We also developed algoritms of extracting cracks from solar cells. We will integrate the algorithms with `PV-Vision`.
+3. ~~We also developed algoritms of extracting cracks from solar cells.~~ We will integrate the algorithms with `PV-Vision`.
 4. ~~We want to predict the worst degradation amount based on the existing crack pattern. This will also be integrated into `PV-Vision`.~~ **Done**
