@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from tqdm import tqdm
 import argparse
-import pv_vision.transform_seg.perspective_transform as transform
+import pv_vision.transform_crop.perspective_transform as transform
 
 parser = argparse.ArgumentParser()
 

@@ -4,7 +4,7 @@ import os
 from tqdm import tqdm
 from pathlib import Path
 import argparse
-import pv_vision.defective_cell_detection.draw_bbox as draw
+import pv_vision.defect_detection.draw_bbox as draw
 
 parser = argparse.ArgumentParser()
 
