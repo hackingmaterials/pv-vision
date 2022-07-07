@@ -1,4 +1,10 @@
 # PV-Vision
+
+---
+[![GitHub license](https://img.shields.io/github/license/hackingmaterials/pv-vision)](https://github.com/hackingmaterials/pv-vision/blob/main/LICENSE)
+[![Requires Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg?label=Requires%20Python)](https://python.org/downloads)
+[![PyPI](https://img.shields.io/pypi/v/pv-vision)](https://pypi.org/project/pv-vision/)
+
 **:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
 
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
@@ -179,3 +185,5 @@ PV-pipeline
 2. ~~We will improve the user experience of our tools. We will do more Object-oriented programming (OOP) in the future version.~~ **Done**
 3. ~~We also developed algoritms of extracting cracks from solar cells.~~ We will integrate the algorithms with `PV-Vision`.
 4. ~~We want to predict the worst degradation amount based on the existing crack pattern. This will also be integrated into `PV-Vision`.~~ **Done**
+5. Add neural network modules
+6. Add result analysis
