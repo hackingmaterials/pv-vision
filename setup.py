@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from pv_vision import __version__
 
-with open("README.md", "r") as f:
+with open("long_description.md", "r") as f:
     long_description = f.read()
 
 setup(

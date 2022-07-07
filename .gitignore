@@ -7,3 +7,6 @@ test
 output
 **/.idea
 **/archive
+pv_vision.egg-info
+dist
+long_description.md
