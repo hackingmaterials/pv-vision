@@ -2,6 +2,18 @@
 **:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
 
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
+
+## Installation
+1. Install from source
+```bash
+git clone https://github.com/hackingmaterials/pv-vision.git
+cd pv-vision
+pip install .
+```
+2. Install from Pypi
+```bash
+pip install pv-vision
+```
 ## Citation
 Please cite our papers if you use our tool or dataset.
 ```
@@ -55,7 +67,9 @@ Upload the model weights to [Supervisely](https://supervise.ly/) and make predic
 ### 3. Use docker
 You can also run the models using `docker`. 
 
-First pull the images
+First make sure you prepare required files as stated in the following folder structure.
+
+Then pull the images
 
 ```bash
 docker pull supervisely/nn-yolo-v3

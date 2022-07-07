@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="pv_vision",
-    version="0.2.0",
+    version=__version__,
     author="XinChen",
     author_email="chenxin0210@lbl.gov",
     description="Image analysis of defects on solar modules, including automatic detection and power loss prediction",
@@ -15,9 +15,10 @@ setup(
     url="https://github.com/hackingmaterials/pv-vision",
     packages=find_packages(),
     include_package_data=True,
+    python_requires='>=3.8',
     install_requires=[
         "matplotlib>=3.4.2",
-        "opencv_python>=4.4.0.46",
+        "opencv_python>=4.4.0.44",
         "seaborn>=0.11.2",
         "torchvision>=0.7.0",
         "pandas>=1.3.2",
