@@ -19,6 +19,9 @@ pip install .
 ```bash
 pip install pv-vision
 ```
+
+3. To enable CUDA and GPU acceleration, install [Pytorch with cudatoolkit](https://pytorch.org/get-started/locally/)
+
 ## Citation
 Please cite our papers if you use our tool or dataset.
 ```
