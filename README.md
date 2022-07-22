@@ -25,7 +25,15 @@ pip install pv-vision
 ## Citation
 Please cite our papers if you use our tool or dataset.
 ```
-Will update soon
+@article{chen2022automated,
+  title={Automated defect identification in electroluminescence images of solar modules},
+  author={Chen, Xin and Karin, Todd and Jain, Anubhav},
+  journal={Solar Energy},
+  volume={242},
+  pages={20--29},
+  year={2022},
+  publisher={Elsevier}
+}
 ``` 
 
 ## Overview
