@@ -44,23 +44,17 @@ This package allows you to analyze electroluminescene (EL) images of PV module. 
 
 You can either use the package `pv_vision` and write your own codes following the instruction in tutorials, or you can directly run our `pipeline.sh`. When `pipeline.sh` is used, `YOLO` model will be applied to do predictions in default. The output will give you the analysis from the model.
 
-Our trained neural network models can be downloaded [here](https://drive.google.com/drive/folders/1Xxy2QfqJSXIVszi2vwIFnwPb7xDjZyfG?usp=sharing).
+Our trained neural network models can be downloaded [here](https://datahub.duramat.org/dataset/neural-network-weights).
 
 Currently the model weights are: 
 
-1. In folder "crack_extraction":
+1. Folder "crack_segmentation" is used for predicting the pixels that belong to cracks, busbars, etc. using semantic segmentation.
 
-   Model "unet_oversample_low" is used for predicting the pixels that belong to cracks, busbars, etc. using semantic segmentation.
+2. Folder "defective_detection" is used to do object detection of defective cells. 
 
-2. In folder "defective_cell\_detection":
+3. Folder "cell_classification" is used to do cell classification. 
 
-    Model "yolo\_rgb" and "yolo\_grayscale" are used for detecting defective cells in the solar modules using objective detection. The module images don't need to be cropped in advance. "yolo\_rgb" can be applied to rgb images and "yolo\_grayscale" can be applied on grayscale images.
-
-    Models in "classifiers" are used to classify the solar cells based on the type of its defects. There are four kinds of models in this folder, which are random forest(RF) model, resnet18 model, resnet50 model and resnet152 model. "resnet\_rgb" can be applied to rgb images and "resnet\_grayscale" can be applied on grayscale images. The module images need to be cropped into single solar cells in advance.
-
-3. In folder "perspective_transform":
-
-    Model "detect\_contour\_unet\_rgb" and "detect\_contour\_unet\_grayscale" are used for perspective transformation of solar module images using semantic segmantation. "rgb" can be applied to rgb images and "grayscale" can be applied on grayscale images.
+4. Folder "module_segmentation" is used for perspective transformation of solar module images using semantic segmantation. It will predict the contour of field module images
 
 ## Analyze data
 The tutorials of using `PV-Vision` can be found in folder `tutorials`. The tutorials cover *perspective transformation*, *cell segmentation*, *model inference* and *model output analysis*. 
