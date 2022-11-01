@@ -3,6 +3,8 @@
 [![GitHub license](https://img.shields.io/github/license/hackingmaterials/pv-vision)](https://github.com/hackingmaterials/pv-vision/blob/main/LICENSE)
 [![Requires Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg?label=Requires%20Python)](https://python.org/downloads)
 [![PyPI](https://img.shields.io/pypi/v/pv-vision)](https://pypi.org/project/pv-vision/)
+[![DOI](https://zenodo.org/badge/253107508.svg)](https://zenodo.org/badge/latestdoi/253107508)
+
 
 **:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
 
@@ -23,7 +25,19 @@ pip install pv-vision
 3. To enable CUDA and GPU acceleration, install [Pytorch with cudatoolkit](https://pytorch.org/get-started/locally/)
 
 ## Citation
-Please cite our papers if you use our tool or dataset.
+Please cite PV-Vision:
+```
+@misc{PV-Vision,
+  doi={10.5281/ZENODO.6564508},
+  url={https://github.com/hackingmaterials/pv-vision},
+  author={Chen, Xin},
+  title={pv-vision},
+  year={2022},
+  copyright={Open Access}
+}
+```
+
+Please also cite this paper for the automatic defect indentification part:
 ```
 @article{chen2022automated,
   title={Automated defect identification in electroluminescence images of solar modules},
@@ -35,6 +49,20 @@ Please cite our papers if you use our tool or dataset.
   publisher={Elsevier}
 }
 ``` 
+
+And this paper and this dataset for the automatic crack segmentation part:
+```
+#The citation for the paper will be added soon.
+
+# Crack segmentation dataset
+@misc{chen2022benchmark,
+  title={A Benchmark for Crack Segmentation in Electroluminescence Images},
+  doi={10.21948/1871275},
+  url={https://datahub.duramat.org/dataset/crack-segmentation},
+  author={Chen, Xin and Karin, Todd and Libby, Cara and Deceglie, Michael and Hacke, Peter and Silverman, Timothy and Gabor, Andrew and Jain, Anubhav},
+  year={2022},
+}
+```
 
 ## Overview
 
