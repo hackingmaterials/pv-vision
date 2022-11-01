@@ -37,7 +37,7 @@ Please cite PV-Vision:
 }
 ```
 
-Please also cite this paper for the automatic defect indentification part:
+Please also cite this paper for the automatic defect identification part:
 ```
 @article{chen2022automated,
   title={Automated defect identification in electroluminescence images of solar modules},
