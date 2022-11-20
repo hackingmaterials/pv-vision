@@ -1,4 +1,4 @@
-# PV-Vision
+ # PV-Vision
 
 [![GitHub license](https://img.shields.io/github/license/hackingmaterials/pv-vision)](https://github.com/hackingmaterials/pv-vision/blob/main/LICENSE)
 [![Requires Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg?label=Requires%20Python)](https://python.org/downloads)
@@ -66,11 +66,9 @@ And this paper and this dataset for the automatic crack segmentation part:
 
 ## Overview
 
-Image analysis of defects on solar cells.
+This package allows you to analyze electroluminescene (EL) images of photovoltaics (PV) modules. The methods provided in this package include module transformation, cell segmentation, crack segmentation, defective cells identification, etc. Future work will include photoluminescence image analysis, image denoising, barrel distortion fixing, etc. 
 
-This package allows you to analyze electroluminescene (EL) images of PV module. The methods in this package include image segmentation, crack detection, defective cells classification and crack-power loss correlation. 
-
-You can either use the package `pv_vision` and write your own codes following the instruction in tutorials, or you can directly run our `pipeline.sh`. When `pipeline.sh` is used, `YOLO` model will be applied to do predictions in default. The output will give you the analysis from the model.
+You can either use the package `pv_vision` and write your own codes following the instruction in tutorials, or you can directly run our `pipeline.sh` to do automated defects indentification. When `pipeline.sh` is used, `YOLO` model will be applied to do predictions in default. The output will give you the analysis from the model.
 
 Our trained neural network models can be downloaded [here](https://datahub.duramat.org/dataset/neural-network-weights).
 
