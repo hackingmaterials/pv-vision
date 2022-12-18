@@ -5,6 +5,7 @@ from pathlib import Path
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 
 def linear(x, a, b):
@@ -157,7 +158,7 @@ def filter_margin(edges, im_length, margin=20):
     return edges
 
 
-def split_img(image, split=None, split_size=None, direction=0):
+def split_img(image, n_split=None, split_size=None, direction=0):
     """Split the image along x/y axis.
 
     Parameters
@@ -165,7 +166,7 @@ def split_img(image, split=None, split_size=None, direction=0):
     image: array
     Image to be split
 
-    split: int
+    n_split: int
     Number of splits.
 
     split_size: int
@@ -183,25 +184,25 @@ def split_img(image, split=None, split_size=None, direction=0):
         raise ValueError("Direction should be either 0 or 1.")
 
     dimension = image.shape[direction]
-    if split_size and (split is None):
-        split = int(dimension / split_size)
-    elif (split_size is None) and (split is None):
+    if split_size and (n_split is None):
+        n_split = int(dimension / split_size)
+    elif (split_size is None) and (n_split is None):
         raise ValueError("Either split or split_size should be provided.")
 
-    end = int(dimension / split)
+    end = int(dimension / n_split)
     if direction == 0:
-        splits = np.vsplit(image[: end * split, :], split)
-        if end * split < dimension:
-            splits.append(image[end * split:, :])
+        splits = np.vsplit(image[: end * n_split, :], n_split)
+        if end * n_split < dimension:
+            splits.append(image[end * n_split:, :])
     elif direction == 1:
-        splits = np.hsplit(image[:, :end * split], split)
-        if end * split < dimension:
-            splits.append(image[:, end * split:])
+        splits = np.hsplit(image[:, :end * n_split], n_split)
+        if end * n_split < dimension:
+            splits.append(image[:, end * n_split:])
 
     return splits
 
 
-def detect_peaks(split, direction, cell_size, busbar, thre=0.9, interval=None, margin=None):
+def detect_peaks(split, direction, busbar, thre=0.9, cell_size=None, interval=None, margin=None):
     """Detect peaks which correspond to internal edges
 
     Parameters
@@ -214,7 +215,8 @@ def detect_peaks(split, direction, cell_size, busbar, thre=0.9, interval=None, m
     If 1: along x axis. Process vertical splits. Detect horizontal lines.
 
     cell_size: int
-    Size (pixel) of a cell in the raw image.
+    Size (pixel) of a cell in the raw image. If provided, peak interval can be
+    automatically computed
 
     busbar: int
     Number of busbars of a cell.
@@ -234,6 +236,9 @@ def detect_peaks(split, direction, cell_size, busbar, thre=0.9, interval=None, m
     if (direction != 1) and (direction != 0):
         raise ValueError("Direction should be either 0 or 1.")
 
+    if cell_size is None and interval is None:
+        raise ValueError("Either cell_size or interval value should be provided.")
+
     if interval is None and direction == 0:
         interval = int(cell_size * 0.95)
     elif interval is None and direction == 1:
@@ -241,28 +246,62 @@ def detect_peaks(split, direction, cell_size, busbar, thre=0.9, interval=None, m
 
     sum_split = np.sum(split, axis=direction)
     sum_split = sum_split / np.max(sum_split)
-    sum_split[sum_split > thre] = 1
+    sum_split_thre = deepcopy(sum_split)
+    sum_split_thre[sum_split > thre] = 1
 
-    peaks, _ = find_peaks(-1 * sum_split, distance=interval)
+    peaks, _ = find_peaks(-1 * sum_split_thre, distance=interval)
     if margin:
         peaks = filter_margin(peaks, im_length=split.shape[direction - 1], margin=margin)
 
-    return peaks
+    return sum_split, sum_split_thre, peaks
 
 
-def plot_peaks(n, image, cell_size, busbar, split=None, split_size=None, direction=0, thre=0.9, interval=None, margin=None):
-    splits = split_img(image, split, split_size, direction)
+def plot_peaks_one(n, image, busbar, n_split=None, split_size=None, direction=0,
+                   thre=0.9, cell_size=None, interval=None, margin=None):
+    splits = split_img(image, n_split, split_size, direction)
     split = splits[n]
-    sum_split = np.sum(split, axis=direction)
-    sum_split = sum_split / np.max(sum_split)
-    sum_split[sum_split > thre] = 1
-    peaks = detect_peaks(split, direction, cell_size, busbar, thre, interval, margin)
+    sum_split, sum_split_thre, peaks = detect_peaks(split=split, direction=direction, busbar=busbar, thre=thre,
+                                                    cell_size=cell_size, interval=interval, margin=margin)
+
+    plt.subplot(311)
+    plt.imshow(split, 'gray')
+    plt.subplot(312)
     plt.plot(list(range(len(sum_split))), sum_split)
     plt.scatter(peaks, sum_split[peaks])
+    plt.subplot(313)
+    plt.plot(list(range(len(sum_split_thre))), sum_split_thre)
+    plt.scatter(peaks, sum_split_thre[peaks])
+    plt.tight_layout()
+
+
+def plot_peaks_three(n_list, image, busbar, n_split=None, split_size=None, direction=0,
+                     thre=0.9, cell_size=None, interval=None, margin=None):
+    splits = split_img(image, n_split, split_size, direction)
+    for i, n in enumerate(n_list):
+        split = splits[n]
+        sum_split, sum_split_thre, peaks = detect_peaks(split=split, direction=direction, busbar=busbar, thre=thre,
+                                                        cell_size=cell_size, interval=interval, margin=margin)
+
+        plt.subplot(330 + i * 3 + 1)
+        plt.imshow(split, 'gray')
+        if i == 0:
+            plt.title('Module split')
+        plt.subplot(330 + i * 3 + 2)
+        plt.plot(list(range(len(sum_split))), sum_split)
+        plt.scatter(peaks, sum_split[peaks])
+        if i == 0:
+            plt.title("Original sum")
+        plt.subplot(330 + i * 3 + 3)
+        plt.plot(list(range(len(sum_split_thre))), sum_split_thre)
+        plt.scatter(peaks, sum_split_thre[peaks])
+        if i == 0:
+            plt.title("Threshold sum")
+    plt.tight_layout()
 
 
 def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None, margin=None):
-    """ Detect vertical edges by segmenting image into horizontal splits
+    """ Detect vertical edges by segmenting image into horizontal splits. Note that the module
+    is not perpective transformed yet.
 
     Parameters
     ----------
@@ -291,24 +330,24 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
     Suppose a line is y=a*x+b.
     Return a and b of a couple edges (left and right of a cell).
     """
-    #height = image_thre.shape[0]
-    #end = int(height / split)
-    #image_hsplits = np.vsplit(image_thre[: end * split, :], split)  # horizontal splits
-    #image_hsplits.append(image_thre[end * split:, :])
+    # height = image_thre.shape[0]
+    # end = int(height / split)
+    # image_hsplits = np.vsplit(image_thre[: end * split, :], split)  # horizontal splits
+    # image_hsplits.append(image_thre[end * split:, :])
     image_hsplits = split_img(image_thre, split=split, direction=0)
 
     edge_x = []
     inx_y = []
     for inx, im_split in enumerate(image_hsplits):
-        #sum_split = np.sum(im_split, axis=0)
-        #sum_split = sum_split / np.max(sum_split)
-        #sum_split[sum_split > thre] = 1
+        # sum_split = np.sum(im_split, axis=0)
+        # sum_split = sum_split / np.max(sum_split)
+        # sum_split[sum_split > thre] = 1
 
-        #if peak_interval is None:
+        # if peak_interval is None:
         #    peak_interval = int(cell_size * 0.95)
-        #peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
-        peak = detect_peaks(im_split, direction=0, cell_size=cell_size,
-                            busbar=None, thre=thre, interval=peak_interval, margin=margin)
+        # peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
+        _, _, peak = detect_peaks(im_split, direction=0, cell_size=cell_size,
+                                  busbar=None, thre=thre, interval=peak_interval, margin=margin)
         if len(peak) > column - 2:
             peak_new = [peak[0]]
             for i in range(1, len(peak) - 1):
@@ -355,7 +394,8 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
 
 
 def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50, peak_interval=None, margin=None):
-    """ Detect horizontal edges by segmenting image into vertical splits
+    """ Detect horizontal edges by segmenting image into vertical splits. Note that the module
+    is not perpective transformed yet.
 
     Parameters
     ---------
@@ -387,23 +427,23 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
     Suppose a line is y=a*x+b.
     Return 'a' and 'b' of a couple edges (top and bottom of a cell).
         """
-    #width = image_thre.shape[1]
-    #end = int(width / split)
-    #image_vsplits = np.hsplit(image_thre[:, :end * split], split)  # vertical splits
-    #image_vsplits.append(image_thre[:, end * split:])
+    # width = image_thre.shape[1]
+    # end = int(width / split)
+    # image_vsplits = np.hsplit(image_thre[:, :end * split], split)  # vertical splits
+    # image_vsplits.append(image_thre[:, end * split:])
     image_vsplits = split_img(image_thre, split=split, direction=1)
 
     edge_y = []
     inx_x = []
     for inx, im_split in enumerate(image_vsplits):
-        #sum_split = np.sum(im_split, axis=1)
-        #sum_split = sum_split / np.max(sum_split)
-        #sum_split[sum_split > thre] = 1
+        # sum_split = np.sum(im_split, axis=1)
+        # sum_split = sum_split / np.max(sum_split)
+        # sum_split[sum_split > thre] = 1
 
-        #if peak_interval is None:
+        # if peak_interval is None:
         #    peak_interval = int(cell_size / (busbar + 1) * 0.5)
-        #peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
-        peak = detect_peaks(im_split, 1, cell_size, busbar, thre, peak_interval, margin=margin)
+        # peak, _ = find_peaks(-1 * sum_split, distance=peak_interval)
+        _, _, peak = detect_peaks(im_split, 1, cell_size, busbar, thre, peak_interval, margin=margin)
         if len(peak) >= row * (busbar + 1) - 1:
             peak_new = [peak[0]]
             for i in range(1, len(peak) - 1):
@@ -449,7 +489,8 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
     return hline_abs_couple
 
 
-def detect_edge(image, row_col, cell_size, busbar, peaks_on=0, split_size=10, peak_interval=None, margin=20):
+def detect_edge(image, row_col, busbar, peaks_on=0, split_size=10, thre=0.9,
+                cell_size=None, peak_interval=None, margin=20):
     """Detect the inner edges of a solar module. Split the solar module first, then detect position of
     edges in each split.
     Note that the solar module is already perspectively transformed.
@@ -477,6 +518,10 @@ def detect_edge(image, row_col, cell_size, busbar, peaks_on=0, split_size=10, pe
     split_size: int
     The size of each split
 
+    thre: float
+    Peak intensity above THRE will be set as 1.
+    Note that the edge's peak intensity should be lowest because edges are black
+
     peak_interval: int
     Distance between each peak.
 
@@ -500,35 +545,18 @@ def detect_edge(image, row_col, cell_size, busbar, peaks_on=0, split_size=10, pe
     if peaks_on != 0 and peaks_on != 1:
         raise ValueError('peaks_on must be 0 or 1')
 
-    #if peaks_on == 0:
-    #    splits = np.vsplit(image_g, image_g.shape[0] / split_size)
-
-    #elif peaks_on == 1:
-    #    splits = np.hsplit(image_g, image_g.shape[1] / split_size)
-
-    #else:
-    #    raise ValueError('peaks_on must be 0 or 1')
-
     splits = split_img(image_g, split_size=split_size, direction=peaks_on)
 
     peaklist = []
     splits_inx = []
 
-    # peaks when suming the whole image
-    #sum_whole = np.sum(image_g, axis=peaks_on)
-    #sum_whole = sum_whole / sum_whole.max()
-    #peaks_whole, _ = find_peaks(-sum_whole, distance=cell_size)
-    #peaks_whole = filter_margin(peaks_whole, im_length=im_size[peaks_on - 1], margin=margin)
-    peaks_whole = detect_peaks(image_g, peaks_on, cell_size, busbar, interval=peak_interval, margin=margin)
+    _, _, peaks_whole = detect_peaks(split=image_g, direction=peaks_on, busbar=busbar, thre=thre,
+                                     cell_size=cell_size, interval=peak_interval, margin=margin)
 
     flag = False
     for inx, split in enumerate(splits):
-
-        #sum_split = np.sum(split, axis=peaks_on)
-        #sum_split = sum_split / sum_split.max()
-        #peaks_split, _ = find_peaks(-sum_split, distance=cell_size)
-        #peaks_split = filter_margin(peaks_split, im_length=im_size[peaks_on - 1], margin=margin)
-        peaks_split = detect_peaks(split, peaks_on, cell_size, busbar, interval=peak_interval, margin=margin)
+        _, _, peaks_split = detect_peaks(split=split, direction=peaks_on, busbar=busbar,
+                                         cell_size=cell_size, interval=peak_interval, margin=margin)
 
         splits_inx.append(int(split_size * (inx + 1 / 2)))
         if len(peaks_split) == row_col[peaks_on - 1] - 1:

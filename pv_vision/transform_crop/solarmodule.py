@@ -7,6 +7,7 @@ from pathlib import Path
 
 class AbstractModule:
     """Parent class. This class provide basic methods of processing a module image"""
+
     def __init__(self, image, row, col, busbar):
         self._image = image
         self._size = image.shape
@@ -171,6 +172,7 @@ class AbstractModule:
 
 class SplitModule(AbstractModule):
     """Raw module image class that use splitting to crop cells"""
+
     def __init__(self, image, row, col, busbar):
         super().__init__(image, row, col, busbar)
         self._cells = None
@@ -184,7 +186,8 @@ class SplitModule(AbstractModule):
 
         return self._cells
 
-    def crop_cell(self, cellsize, hsplit=100, hthre=0.8, hinterval=100, hmargin=None, vsplit=50, vthre=0.6, vinterval=250, vmargin=None, savepath=None, displace=None):
+    def crop_cell(self, cellsize, hsplit=100, hthre=0.8, hinterval=100, hmargin=None, vsplit=50, vthre=0.6,
+                  vinterval=250, vmargin=None, savepath=None, displace=None):
         """Crop cells
 
         Parameters
@@ -210,11 +213,13 @@ class SplitModule(AbstractModule):
         """
 
         image_thre = transform.image_threshold(self.image, adaptive=True)
-        image_thre = cv.resize(image_thre,(4000,2500))
+        image_thre = cv.resize(image_thre, (4000, 2500))
         self._vline_abs = seg.detect_vertical_lines(image_thre, cell_size=cellsize,
-                                              column=self.col, thre=hthre, split=hsplit, peak_interval=vinterval, margin=vmargin)
+                                                    column=self.col, thre=hthre, split=hsplit, peak_interval=vinterval,
+                                                    margin=vmargin)
         self._hline_abs = seg.detect_horizon_lines(image_thre, row=self.row, busbar=self.busbar,
-                                             cell_size=cellsize, thre=vthre, split=vsplit, peak_interval=hinterval, margin=hmargin)
+                                                   cell_size=cellsize, thre=vthre, split=vsplit,
+                                                   peak_interval=hinterval, margin=hmargin)
 
         self._cells = seg.segment_cell(self.image, self._hline_abs, self._vline_abs, cellsize, savepath, displace)
 
@@ -226,6 +231,7 @@ class SplitModule(AbstractModule):
 
 class MaskModule(AbstractModule):
     """Raw module image class that has a mask of target modules"""
+
     def __init__(self, image, row, col, busbar):
         super().__init__(image, row, col, busbar)
         self._mask = None
@@ -340,7 +346,7 @@ class MaskModule(AbstractModule):
             print("Mask is not loaded")
             return None
         self._corners = transform.find_module_corner(self._mask, self._mask_center,
-                                               dist, displace, method, corner_center, center_displace)
+                                                     dist, displace, method, corner_center, center_displace)
         if output:
             return self._corners
 
@@ -354,6 +360,7 @@ class MaskModule(AbstractModule):
         mode == 1: detect corners of the approximated convex of module
         mode == 2: detect corners of the approximated contour of the module
         mode == 3: detect corners of the blurred mask of the module
+        mode == 4: detect corners using boudingRect. This is useful if your module is a rounded rectangle.
 
         output: bool
         If true, return the corners
@@ -396,7 +403,7 @@ class MaskModule(AbstractModule):
         if self._corners is None:
             print("Corners are not detected. Start automatic detection")
             return None
-            #self._corners = self.corner_detection_cont(mode=1)
+            # self._corners = self.corner_detection_cont(mode=1)
 
         if cellsize:
             width = self.col * cellsize
@@ -426,10 +433,18 @@ class MaskModule(AbstractModule):
         res = self._transformed.is_transformed(x_min, y_min)
         return res
 
-    def crop_cell(self, cellsize, simple=False, vl_interval=None, vl_split_size=None,
-                  hl_interval=None, hl_split_size=None, margin=None):
-        cells = self._transformed.crop_cell(cellsize, simple, vl_interval, vl_split_size,
-                  hl_interval, hl_split_size, margin)
+    def plot_peaks(self, n_list, split_size, interval, thre, margin, direction=0):
+        self._transformed.plot_peaks(n_list, split_size, interval, thre, margin, direction)
+
+    def crop_cell(self, cellsize, inner_edges_para=None, plot=False, simple=False):
+        if inner_edges_para is not None:
+            for para in ["vl_interval", "vl_thre", "vl_split_size", "vl_margin",
+                            "hl_interval", "hl_thre", "hl_split_size", "hl_margin"]:
+                if para not in inner_edges_para:
+                    raise KeyError("{} is not provided.".format(para))
+        cells = self._transformed.crop_cell(cellsize=cellsize,
+                                            inner_edges_para=inner_edges_para,
+                                            plot=plot, simple=simple)
 
         return cells
 
@@ -441,6 +456,8 @@ class TransformedModule(AbstractModule):
         super().__init__(image, row, col, busbar)
         if len(self._size) != 2:
             super().remove_channel(in_place=True)
+        self.inner_edges_para = {}
+        self.inner_edges_abs = {}
 
     # @staticmethod
     def is_transformed(self, x_min, y_min):
@@ -461,26 +478,65 @@ class TransformedModule(AbstractModule):
         peak_x, peak_y = transform.find_inner_edge(self._image)
         return (len(peak_x) >= x_min) and (len(peak_y) >= y_min)
 
-    def crop_cell(self, cellsize, simple=False, vl_interval=None, vl_split_size=None,
-                  hl_interval=None, hl_split_size=None, margin=None):
+    def plot_peaks(self, n_list, split_size, interval, thre, margin, direction=0):
+        seg.plot_peaks_three(n_list, image=self.image, busbar=self.busbar, split_size=split_size, direction=direction,
+                             thre=thre, interval=interval, margin=margin)
+        if direction==0:
+            self.inner_edges_para['vl_interval'] = interval
+            self.inner_edges_para['vl_thre'] = thre
+            self.inner_edges_para['vl_split_size'] = split_size
+            self.inner_edges_para['vl_margin'] = margin
+        else:
+            self.inner_edges_para['hl_interval'] = interval
+            self.inner_edges_para['hl_thre'] = thre
+            self.inner_edges_para['hl_split_size'] = split_size
+            self.inner_edges_para['hl_margin'] = margin
+
+    def _detect_inner_edges(self, cellsize, vl_interval, vl_thre, vl_split_size, vl_margin,
+                            hl_interval, hl_thre, hl_split_size, hl_margin, simple=False):
+
         if simple:
-            vline_abs = list(zip(np.zeros(self.col - 1), 
-                np.linspace(0, self.size[1], self.col + 1)[1: -1].astype(int)))
-            hline_abs = list(zip(np.zeros(self.row - 1), 
-                np.linspace(0, self.size[0], self.row + 1)[1: -1].astype(int)))
+            vline_abs = list(zip(np.zeros(self.col - 1),
+                                 np.linspace(0, self.size[1], self.col + 1)[1: -1].astype(int)))
+            hline_abs = list(zip(np.zeros(self.row - 1),
+                                 np.linspace(0, self.size[0], self.row + 1)[1: -1].astype(int)))
         else:
             vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
-                                                    busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
-                                                    peak_interval=vl_interval, margin=margin)
+                                                      busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
+                                                      peak_interval=vl_interval, thre=vl_thre, margin=vl_margin)
             vline_abs = seg.linear_regression(vinx_split, vline_split)
             hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
-                                                    busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
-                                                    peak_interval=hl_interval, margin=margin)
+                                                      busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
+                                                      peak_interval=hl_interval, thre=hl_thre, margin=hl_margin)
             hline_abs = seg.linear_regression(hinx_split, hline_split)
 
         hline_abs_couple = seg.couple_edges(hline_abs, length=self.size[0])
+        self.inner_edges_abs['hline_abs_couple'] = hline_abs_couple
         vline_abs_couple = seg.couple_edges(vline_abs, length=self.size[1])
+        self.inner_edges_abs['vline_abs_couple'] = vline_abs_couple
 
+        return hline_abs_couple, vline_abs_couple
+
+    def plot_edges(self):
+        if 'hline_abs_couple' not in self.inner_edges_abs or 'vline_abs_couple' not in self.inner_edges_abs:
+            raise KeyError("Inner edge parameters are not detected.")
+        hline_abs_couple = self.inner_edges_abs['hline_abs_couple']
+        vline_abs_couple = self.inner_edges_abs['vline_abs_couple']
+        seg.plot_edges(self.image, hline_abs_couple, vline_abs_couple, linewidth=1)
+
+    def crop_cell(self, cellsize, inner_edges_para=None, plot=False, simple=False):
+        if inner_edges_para is None:
+            if 'vl_interval' not in self.inner_edges_para:
+                raise KeyError("vertical edge parameter is not provided")
+            elif 'hl_interval' not in self.inner_edges_para:
+                raise KeyError("horizontal edge parameter is not provided")
+            else:
+                inner_edges_para = self.inner_edges_para
+
+        hline_abs_couple, vline_abs_couple = self._detect_inner_edges(cellsize, simple=simple,
+                                                                      **inner_edges_para)
+        if plot:
+            self.plot_edges()
         return np.array(seg.segment_cell(self.image, hline_abs_couple, vline_abs_couple, cellsize=cellsize))
 
     def classify_cells(self, ann_path, defects_inx_dic):

@@ -499,7 +499,7 @@ def find_module_corner2(mask, mode=0):
     mode == 1: detect corners of the approximated convex of module
     mode == 2: detect corners of the approximated contour of the module
     mode == 3: detect corners of the blurred mask of the module
-    mode == 4: detect corners using boudingRect
+    mode == 4: detect corners using boudingRect. This is useful if your module is a rounded rectangle.
 
     Returns
     -------
