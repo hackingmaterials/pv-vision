@@ -25,19 +25,8 @@ pip install pv-vision
 3. To enable CUDA and GPU acceleration, install [Pytorch with cudatoolkit](https://pytorch.org/get-started/locally/)
 
 ## Citation
-Please cite PV-Vision:
-```
-@misc{PV-Vision,
-  doi={10.5281/ZENODO.6564508},
-  url={https://github.com/hackingmaterials/pv-vision},
-  author={Chen, Xin},
-  title={pv-vision},
-  year={2022},
-  copyright={Open Access}
-}
-```
-
-Please also cite this paper for the automatic defect identification part:
+**Please cite our papers:**
+Automatic defect identification pipeline:
 ```
 @article{chen2022automated,
   title={Automated defect identification in electroluminescence images of solar modules},
@@ -50,9 +39,17 @@ Please also cite this paper for the automatic defect identification part:
 }
 ``` 
 
-And this paper and this dataset for the automatic crack segmentation part:
+Automatic crack segmentation and feature extraction:
 ```
-#The citation for the paper will be added soon.
+# Crack segmentation paper
+@inproceedings{chen2022automatic,
+  title={Automatic Crack Segmentation in Electroluminescence Images of Solar Modules and Maximum Inactive Area Prediction},
+  author={Chen, Xin and Karin, Todd and Jain, Anubhav},
+  booktitle={2022 IEEE 49th Photovoltaics Specialists Conference (PVSC)},
+  pages={213--213},
+  year={2022},
+  organization={IEEE}
+}
 
 # Crack segmentation dataset
 @misc{chen2022benchmark,
@@ -61,6 +58,18 @@ And this paper and this dataset for the automatic crack segmentation part:
   url={https://datahub.duramat.org/dataset/crack-segmentation},
   author={Chen, Xin and Karin, Todd and Libby, Cara and Deceglie, Michael and Hacke, Peter and Silverman, Timothy and Gabor, Andrew and Jain, Anubhav},
   year={2022},
+}
+```
+
+**Please cite PV-Vision:**
+```
+@misc{PV-Vision,
+  doi={10.5281/ZENODO.6564508},
+  url={https://github.com/hackingmaterials/pv-vision},
+  author={Chen, Xin},
+  title={pv-vision},
+  year={2022},
+  copyright={Open Access}
 }
 ```
 
