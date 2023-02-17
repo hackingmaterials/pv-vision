@@ -27,6 +27,5 @@ Read [tutorials](https://github.com/hackingmaterials/pv-vision/tree/main/tutoria
 
 ## Citation
 Please cite our papers if you use our tool or dataset.
-```
-Will update soon
-``` 
+
+Citation format can be found in our [github](https://github.com/hackingmaterials/pv-vision/)
