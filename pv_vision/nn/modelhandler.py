@@ -13,14 +13,16 @@ import os
 import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
+from torch.utils.data import random_split
 
 class ModelHandler:
     def __init__(self,
                  model,
-                 train_dataset,
-                 val_dataset,
-                 test_dataset,
-                 batch_size=128,
+                 train_dataset=None,
+                 val_dataset=None,
+                 test_dataset=None,
+                 batch_size_train=128,
+                 batch_size_val=128,
                  learning_rate=0.001,
                  lr_scheduler=None,
                  num_epochs=15,
@@ -47,7 +49,10 @@ class ModelHandler:
         test_dataset: torch.utils.data.Dataset
         Dataset to test the model
 
-        batch_size: int
+        predict_only: bool
+        If True, only make prediction without training. Default is False.
+
+        batch_size_train/val: int
         Batch size to use for training. Default is 128.
 
         learning_rate: float
@@ -83,14 +88,17 @@ class ModelHandler:
         """
 
         self.model = model
+
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
-        self.batch_size = batch_size
 
-        self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
-        self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
-        self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
+        self.batch_size_train = batch_size_train
+        self.batch_size_val = batch_size_val
+
+        self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size_train, shuffle=True)
+        self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size_val, shuffle=False)
+        self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size_val, shuffle=False)
 
         if learning_rate is None:
             raise ValueError('learning_rate is not defined')
@@ -104,11 +112,16 @@ class ModelHandler:
         else:
             self.criterion = criterion
 
-        self.evaluate_metric = evaluate_metric
+        # check if evaluate_metric is a class
         # check if evaluate_metric has __name__ attribute
-        if self.evaluate_metric is not None:
-            if not hasattr(self.evaluate_metric, '__name__'):
-                raise ValueError('evaluate_metric must have __name__ attribute')
+        if evaluate_metric is not None:
+            if not isinstance(evaluate_metric, type):
+                raise ValueError('evaluate_metric is not a class')
+            if not hasattr(evaluate_metric, '__name__'):
+                raise ValueError('evaluate_metric does not have __name__ attribute')
+            self.evaluate_metric = evaluate_metric()
+        else:
+            self.evaluate_metric = None
 
         self.optimizer = optimizer if optimizer is not None else optim.Adam(self.model.parameters())
         self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -116,17 +129,18 @@ class ModelHandler:
 
         # One dictionary that record loss and metric of training and validation for each epoch
         # use the name of the metric as the key. If no metric is defined, only use 'loss' as the key
-        self.running_record = {'train': {'loss':[]}, 'val': {'loss':[]}}
+        self.running_record = {'train': {'loss': []}, 'val': {'loss': []}}
         if self.evaluate_metric is not None:
             self.running_record['train'][self.evaluate_metric.__name__] = []
             self.running_record['val'][self.evaluate_metric.__name__] = []
 
+        self.save_dir = save_dir
+        os.makedirs(self.save_dir, exist_ok=True)
+        self.save_name = save_name
+
         self.log_interval = 10
         self._setup_logging()
 
-        self.save_dir = save_dir
-        os.mkdir(self.save_dir, exist_ok=True)
-        self.save_name = save_name
 
     def _setup_logging(self):
         """ Setup logging """
@@ -162,7 +176,7 @@ class ModelHandler:
             self.optimizer.zero_grad()
             output = self.model(data)
             loss = self.criterion(output, target)
-            loss_epoch += loss.item()
+            loss_epoch += loss.item() * data.size(0)
             if self.evaluate_metric is not None:
                 metric = self.evaluate_metric(output, target)
                 metric_epoch += metric
@@ -199,7 +213,7 @@ class ModelHandler:
             for data, target in dataloader:
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
-                loss += self.criterion(output, target).item()
+                loss += self.criterion(output, target).item() * data.size(0)
                 if self.evaluate_metric is not None:
                     metric += self.evaluate_metric(output, target).item()
 
@@ -219,7 +233,7 @@ class ModelHandler:
             self.logger.info(f'{self.evaluate_metric.__name__}: {metric}')
         return loss, metric
 
-    def test(self):
+    def test_model(self):
         """ Test model on test set """
         loss, metric = self._evaluate(self.test_loader)
         self.logger.info(f'Test set: Average loss: {loss:.4f}')
@@ -228,8 +242,8 @@ class ModelHandler:
 
         return loss, metric
 
-    def train(self):
-        """ Train model """
+    def train_model(self):
+        """ Train and evaluate model """
         for epoch in range(1, self.num_epochs + 1):
             loss_train, metric_train = self._train(epoch)
             loss_val, metric_val = self._validate(epoch)
@@ -247,9 +261,10 @@ class ModelHandler:
         self.model.load_state_dict(torch.load(path))
         self.model.to(self.device)
 
-    def predict(self, dataloader):
-        """ Predict on dataloader """
-        self.model.eval()
+    @staticmethod
+    def predict(model, dataloader):
+        """ Predict on new dataloader that doesn't have labels """
+        model.eval()
         output = []
         with torch.no_grad():
             for data in dataloader:
@@ -257,10 +272,11 @@ class ModelHandler:
                 output.append(self.model(data).cpu().numpy())
         return np.concatenate(output)
 
-    def predict_proba(self, dataloader):
-        """ Predict probability on dataloader """
+    @ staticmethod
+    def predict_proba(model, dataloader):
+        """ Predict probability on dataloader that doesn't have labels"""
         pass
-        # self.model.eval()
+        # model.eval()
         # output = []
         # with torch.no_grad():
         #     for data in dataloader:
