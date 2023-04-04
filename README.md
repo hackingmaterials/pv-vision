@@ -26,6 +26,7 @@ pip install pv-vision
 
 ## Citation
 **Please cite our papers:**
+
 Automatic defect identification pipeline:
 ```
 @article{chen2022automated,
@@ -42,13 +43,12 @@ Automatic defect identification pipeline:
 Automatic crack segmentation and feature extraction:
 ```
 # Crack segmentation paper
-@inproceedings{chen2022automatic,
-  title={Automatic Crack Segmentation in Electroluminescence Images of Solar Modules and Maximum Inactive Area Prediction},
-  author={Chen, Xin and Karin, Todd and Jain, Anubhav},
-  booktitle={2022 IEEE 49th Photovoltaics Specialists Conference (PVSC)},
-  pages={213--213},
-  year={2022},
-  organization={IEEE}
+@article{chen2023automatic,
+  title={Automatic Crack Segmentation and Feature Extraction in Electroluminescence Images of Solar Modules},
+  author={Chen, Xin and Karin, Todd and Libby, Cara and Deceglie, Michael and Hacke, Peter and Silverman, Timothy J and Jain, Anubhav},
+  journal={IEEE Journal of Photovoltaics},
+  year={2023},
+  publisher={IEEE}
 }
 
 # Crack segmentation dataset
