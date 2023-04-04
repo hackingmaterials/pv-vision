@@ -14,6 +14,7 @@ import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
 from torch.utils.data import random_split
+from tqdm import tqdm
 
 class ModelHandler:
     def __init__(self,
@@ -21,6 +22,7 @@ class ModelHandler:
                  train_dataset=None,
                  val_dataset=None,
                  test_dataset=None,
+                 predict_only = False,
                  batch_size_train=128,
                  batch_size_val=128,
                  learning_rate=0.001,
@@ -53,7 +55,7 @@ class ModelHandler:
         If True, only make prediction without training. Default is False.
 
         batch_size_train/val: int
-        Batch size to use for training. Default is 128.
+        Batch size to use for training. Default is 128. Batch_size_val is only used if predict_only is True.
 
         learning_rate: float
         Learning rate to use for training. Default is 0.001.
@@ -93,46 +95,57 @@ class ModelHandler:
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
 
-        self.batch_size_train = batch_size_train
-        self.batch_size_val = batch_size_val
+        self.predict_only = predict_only
+        if self.predict_only:
+            if self.train_dataset is not None or self.val_dataset is not None:
+                raise ValueError('train_dataset and val_dataset must be None when predict_only is True')
+            if self.test_dataset is None:
+                raise ValueError('test_dataset must be defined when predict_only is True')
 
-        self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size_train, shuffle=True)
-        self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size_val, shuffle=False)
+        self.batch_size_val = batch_size_val
         self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size_val, shuffle=False)
 
-        if learning_rate is None:
-            raise ValueError('learning_rate is not defined')
-        else:
-            self.learning_rate = learning_rate
+        if self.predict_only is False:
+            self.batch_size_train = batch_size_train
 
-        self.lr_scheduler = lr_scheduler
-        self.num_epochs = num_epochs
-        if criterion is None:
-            raise ValueError('criterion is not defined')
-        else:
-            self.criterion = criterion
+            self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size_train, shuffle=True)
+            self.val_loader = DataLoader(self.val_dataset, batch_size=self.batch_size_val, shuffle=False)
 
-        # check if evaluate_metric is a class
-        # check if evaluate_metric has __name__ attribute
-        if evaluate_metric is not None:
-            if not isinstance(evaluate_metric, type):
-                raise ValueError('evaluate_metric is not a class')
-            if not hasattr(evaluate_metric, '__name__'):
-                raise ValueError('evaluate_metric does not have __name__ attribute')
-            self.evaluate_metric = evaluate_metric()
-        else:
-            self.evaluate_metric = None
+            if learning_rate is None:
+                raise ValueError('learning_rate is not defined')
+            else:
+                self.learning_rate = learning_rate
 
-        self.optimizer = optimizer if optimizer is not None else optim.Adam(self.model.parameters())
+            self.lr_scheduler = lr_scheduler
+            self.num_epochs = num_epochs
+            if criterion is None:
+                raise ValueError('criterion is not defined')
+            else:
+                self.criterion = criterion
+
+            # check if evaluate_metric is a class
+            # check if evaluate_metric has __name__ attribute
+            if evaluate_metric is not None:
+                if not isinstance(evaluate_metric, type):
+                    raise ValueError('evaluate_metric is not a class')
+                if not hasattr(evaluate_metric, '__name__'):
+                    raise ValueError('evaluate_metric does not have __name__ attribute')
+                self.evaluate_metric = evaluate_metric()
+            else:
+                self.evaluate_metric = None
+
+
+            self.optimizer = optimizer if optimizer is not None else optim.Adam(self.model.parameters())
+
+            # One dictionary that record loss and metric of training and validation for each epoch
+            # use the name of the metric as the key. If no metric is defined, only use 'loss' as the key
+            self.running_record = {'train': {'loss': []}, 'val': {'loss': []}}
+            if self.evaluate_metric is not None:
+                self.running_record['train'][self.evaluate_metric.__name__] = []
+                self.running_record['val'][self.evaluate_metric.__name__] = []
+
         self.device = device if device is not None else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model.to(self.device)
-
-        # One dictionary that record loss and metric of training and validation for each epoch
-        # use the name of the metric as the key. If no metric is defined, only use 'loss' as the key
-        self.running_record = {'train': {'loss': []}, 'val': {'loss': []}}
-        if self.evaluate_metric is not None:
-            self.running_record['train'][self.evaluate_metric.__name__] = []
-            self.running_record['val'][self.evaluate_metric.__name__] = []
 
         self.save_dir = save_dir
         os.makedirs(self.save_dir, exist_ok=True)
@@ -158,9 +171,12 @@ class ModelHandler:
         # add the handlers to the logger
         self.logger.addHandler(handler)
 
+        # initial message
+        self.logger.info('ModelHandler initialized.')
+
     def _save_model(self, epoch):
         """ Save model """
-        os.mkdir(os.path.join(self.save_dir, f'epoch_{epoch}'), exist_ok=True)
+        os.makedirs(os.path.join(self.save_dir, f'epoch_{epoch}'), exist_ok=True)
         torch.save(self.model.state_dict(), os.path.join(self.save_dir, f'epoch_{epoch}', self.save_name))
         self.logger.info(f'Saved model at epoch {epoch}')
 
@@ -171,25 +187,24 @@ class ModelHandler:
         self.model.train()
         loss_epoch = 0.0
         metric_epoch = None if self.evaluate_metric is None else 0.0
-        for batch_idx, (data, target) in enumerate(self.train_loader):
+        for batch_idx, (data, target) in enumerate(tqdm(self.train_loader)):
             data, target = data.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
             output = self.model(data)
-            loss = self.criterion(output, target)
+            loss = self.criterion(output, target.reshape(output.shape).float())
             loss_epoch += loss.item() * data.size(0)
             if self.evaluate_metric is not None:
-                metric = self.evaluate_metric(output, target)
+                metric = self.evaluate_metric(output, target.reshape(output.shape).float())
                 metric_epoch += metric
 
             loss.backward()
             self.optimizer.step()
             if batch_idx % self.log_interval == 0:
-                self.logger.info('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                info1 = 'Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(self.train_loader.dataset),
-                    100. * batch_idx / len(self.train_loader), loss.item()))
-
-            if self.evaluate_metric is not None:
-                self.logger.info(f'{self.evaluate_metric.__name__}: {metric}')
+                    100. * batch_idx / len(self.train_loader), loss.item())
+                info2 = '' if self.evaluate_metric is None else f'\t{self.evaluate_metric.__name__}: {metric}'
+                self.logger.info(info1+info2)
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
@@ -210,12 +225,12 @@ class ModelHandler:
         loss = 0.0
         metric = None if self.evaluate_metric is None else 0.0
         with torch.no_grad():
-            for data, target in dataloader:
+            for data, target in tqdm(dataloader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
-                loss += self.criterion(output, target).item() * data.size(0)
+                loss += self.criterion(output, target.reshape(output.shape).float()).item() * data.size(0)
                 if self.evaluate_metric is not None:
-                    metric += self.evaluate_metric(output, target).item()
+                    metric += self.evaluate_metric(output, target.reshape(output.shape).float()).item()
 
         loss /= len(dataloader.dataset)
         if self.evaluate_metric is not None:
@@ -235,18 +250,31 @@ class ModelHandler:
 
     def test_model(self):
         """ Test model on test set """
+        if self.predict_only:
+            raise ValueError('Cannot test model when predict_only is True')
         loss, metric = self._evaluate(self.test_loader)
         self.logger.info(f'Test set: Average loss: {loss:.4f}')
         if self.evaluate_metric is not None:
             self.logger.info(f'{self.evaluate_metric.__name__}: {metric}')
-
+        print(f'Test set: Average loss: {loss:.4f}')
+        if self.evaluate_metric is not None:
+            print(f'{self.evaluate_metric.__name__}: {metric}')
         return loss, metric
 
     def train_model(self):
         """ Train and evaluate model """
+        if self.predict_only:
+            raise ValueError('Cannot train model when predict_only is True')
         for epoch in range(1, self.num_epochs + 1):
+            print(f'Epoch {epoch} / {self.num_epochs}')
+            print('-' * 10)
+
             loss_train, metric_train = self._train(epoch)
             loss_val, metric_val = self._validate(epoch)
+
+            print(f'Loss: {loss_train:.4f} (train) | {loss_val:.4f} (val)')
+            if self.evaluate_metric is not None:
+                print(f'{self.evaluate_metric.__name__}: {metric_train:.4f} (train) | {metric_val:.4f} (val)')
 
             self.running_record['train']['loss'].append(loss_train)
             self.running_record['val']['loss'].append(loss_val)
@@ -260,26 +288,25 @@ class ModelHandler:
         """ Load model from path """
         self.model.load_state_dict(torch.load(path))
         self.model.to(self.device)
+        self.logger.info(f'Loaded model from {path}')
 
-    @staticmethod
-    def predict(model, dataloader):
+    def predict(self):
         """ Predict on new dataloader that doesn't have labels """
-        model.eval()
+        self.model.eval()
         output = []
         with torch.no_grad():
-            for data in dataloader:
+            for data in self.test_loader:
                 data = data.to(self.device)
                 output.append(self.model(data).cpu().numpy())
         return np.concatenate(output)
 
-    @ staticmethod
-    def predict_proba(model, dataloader):
+    def predict_proba(self):
         """ Predict probability on dataloader that doesn't have labels"""
         pass
-        # model.eval()
+        # self.model.eval()
         # output = []
         # with torch.no_grad():
-        #     for data in dataloader:
+        #     for data in self.test_loader:
         #         data = data.to(self.device)
         #         output.append(torch.sigmoid(self.model(data)).cpu().numpy())
         # return np.concatenate(output)
@@ -295,6 +322,8 @@ class ModelHandler:
 
     def plot_metric(self):
         """ Plot metric curve """
+        if self.predict_only:
+            raise ValueError('Cannot plot metric when predict_only is True')
         sns.lineplot(data=self.running_record['train'][self.evaluate_metric.__name__], label='train')
         sns.lineplot(data=self.running_record['val'][self.evaluate_metric.__name__], label='val')
         plt.legend()
