@@ -294,7 +294,7 @@ class ModelHandler:
         """ Predict on new dataloader that doesn't have labels """
         self.model.eval()
         output = []
-        with torch.no_grad():
+        with torch.inference_mode():
             for data in self.test_loader:
                 data = data.to(self.device)
                 output.append(self.model(data).cpu().numpy())
@@ -305,7 +305,7 @@ class ModelHandler:
         pass
         # self.model.eval()
         # output = []
-        # with torch.no_grad():
+        # with torch.inference_mode():
         #     for data in self.test_loader:
         #         data = data.to(self.device)
         #         output.append(torch.sigmoid(self.model(data)).cpu().numpy())
