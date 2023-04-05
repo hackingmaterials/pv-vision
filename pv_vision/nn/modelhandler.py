@@ -16,6 +16,7 @@ import seaborn as sns
 from torch.utils.data import random_split
 from tqdm import tqdm
 
+
 class ModelHandler:
     def __init__(self,
                  model,
@@ -161,7 +162,7 @@ class ModelHandler:
         self.logger.setLevel(logging.INFO)
 
         # create a file handler
-        handler = logging.FileHandler(os.path.join(self.save_dir, 'training.log'))
+        handler = logging.FileHandler(os.path.join(self.save_dir, 'modelhandler.log'))
         handler.setLevel(logging.INFO)
 
         # create a logging format
@@ -290,15 +291,22 @@ class ModelHandler:
         self.model.to(self.device)
         self.logger.info(f'Loaded model from {path}')
 
-    def predict(self):
-        """ Predict on new dataloader that doesn't have labels """
+    def predict(self, save=False):
+        """ Predict on new dataloader that doesn't have labels
+        If save, save all the predictions in one matrix 
+        """
         self.model.eval()
         output = []
         with torch.inference_mode():
-            for data in self.test_loader:
+            for data in tqdm(self.test_loader):
                 data = data.to(self.device)
                 output.append(self.model(data).cpu().numpy())
-        return np.concatenate(output)
+        output = np.concatenate(output)
+        if save:
+            np.save(os.path.join(self.save_dir, self.save_name), output)
+            self.logger.info(f'Saved prediction to {os.path.join(self.save_dir, self.save_name)}')
+            
+        return output
 
     def predict_proba(self):
         """ Predict probability on dataloader that doesn't have labels"""
