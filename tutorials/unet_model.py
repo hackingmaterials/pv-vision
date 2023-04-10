@@ -146,7 +146,7 @@ def _get_encoder_blocks(model):
 
 
 def construct_unet(n_cls, pretrain=False):  # no weights inited
-    model = vgg16_bn(pretrained=pretrain)
+    model = vgg16_bn(weights='DEFAULT')
     encoder_blocks = _get_encoder_blocks(model)
     encoder_channels = [64, 128, 256, 512, 1024]  # vgg16 channels
     # prev_channels = encoder_channels[-1]
