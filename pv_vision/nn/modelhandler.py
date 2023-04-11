@@ -20,6 +20,7 @@ from tqdm import tqdm
 class ModelHandler:
     def __init__(self,
                  model,
+                 model_output=None,
                  train_dataset=None,
                  val_dataset=None,
                  test_dataset=None,
@@ -42,6 +43,11 @@ class ModelHandler:
         ----------
         model: nn.Module
         Model to train
+
+        model_output: String
+        Some models from Pytorch output a dictionary that contains the predcition.
+        The key should be given explicitly.
+        Default is None.
 
         train_dataset: torch.utils.data.Dataset
         Dataset to train the model
@@ -91,6 +97,7 @@ class ModelHandler:
         """
 
         self.model = model
+        self.model_output = model_output
 
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
@@ -192,7 +199,14 @@ class ModelHandler:
             data, target = data.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
             output = self.model(data)
-            loss = self.criterion(output, target.reshape(output.shape).float())
+            if self.model_output:
+                output = output[self.model_output]
+            
+            # check if criterion is cross entropy loss becasue the output shape is different
+            if isinstance(self.criterion, nn.CrossEntropyLoss):
+                loss = self.criterion(output, target.long())
+            else:
+                loss = self.criterion(output, target.reshape(output.shape).float())
             loss_epoch += loss.item() * data.size(0)
             if self.evaluate_metric is not None:
                 metric = self.evaluate_metric(output, target.reshape(output.shape).float())
@@ -229,7 +243,14 @@ class ModelHandler:
             for data, target in tqdm(dataloader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
-                loss += self.criterion(output, target.reshape(output.shape).float()).item() * data.size(0)
+                if self.model_output:
+                    output = output[self.model_output]
+                
+                # check if criterion is cross entropy loss becasue the output shape is different
+                if isinstance(self.criterion, nn.CrossEntropyLoss):
+                    loss += self.criterion(output, target.long()).item() * data.size(0)
+                else:
+                    loss += self.criterion(output, target.reshape(output.shape).float()).item() * data.size(0)
                 if self.evaluate_metric is not None:
                     metric += self.evaluate_metric(output, target.reshape(output.shape).float()).item()
 
@@ -251,12 +272,16 @@ class ModelHandler:
 
     def test_model(self):
         """ Test model on test set """
+        print('Testing mode')
+        print('-' * 10)
         if self.predict_only:
             raise ValueError('Cannot test model when predict_only is True')
         loss, metric = self._evaluate(self.test_loader)
+
         self.logger.info(f'Test set: Average loss: {loss:.4f}')
         if self.evaluate_metric is not None:
             self.logger.info(f'{self.evaluate_metric.__name__}: {metric}')
+        
         print(f'Test set: Average loss: {loss:.4f}')
         if self.evaluate_metric is not None:
             print(f'{self.evaluate_metric.__name__}: {metric}')
@@ -300,7 +325,10 @@ class ModelHandler:
         with torch.inference_mode():
             for data in tqdm(self.test_loader):
                 data = data.to(self.device)
-                output.append(self.model(data).cpu().numpy())
+                out = self.model(data)
+                if self.model_output:
+                    out = out[self.model_output]
+                output.append(out.cpu().numpy())
         output = np.concatenate(output)
         if save:
             np.save(os.path.join(self.save_dir, self.save_name), output)
