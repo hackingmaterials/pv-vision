@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from torch.utils.data import random_split
 from tqdm import tqdm
+import pickle
 
 
 class ModelHandler:
@@ -161,7 +162,7 @@ class ModelHandler:
 
         self.log_interval = 10
         self._setup_logging()
-
+        self.cache = {}
 
     def _setup_logging(self):
         """ Setup logging """
@@ -232,20 +233,28 @@ class ModelHandler:
 
         return loss_epoch, metric_epoch
 
-    def _evaluate(self, dataloader):
+    def _evaluate(self, dataloader, cache_output=False):
         """ Evaluate model for val/test.
         Return the loss. If evaluate_metric is defined, also return the metric value.
+        If cache_output is given, will cache the output of model. The value of cache_output
+        will be the key of cache.
         """
+        # cache_output should be either False or String
+        if (not isinstance(cache_output, str)) and (not isinstance(cache_output, bool)):
+                raise TypeError('cache_output must be either False or String')
         self.model.eval()
         loss = 0.0
         metric = None if self.evaluate_metric is None else 0.0
+        if cache_output:
+            outall = []
         with torch.no_grad():
             for data, target in tqdm(dataloader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
                 if self.model_output:
                     output = output[self.model_output]
-                
+                if cache_output:
+                    outall.append(output.cpu().numpy())
                 # check if criterion is cross entropy loss becasue the output shape is different
                 if isinstance(self.criterion, nn.CrossEntropyLoss):
                     loss += self.criterion(output, target.long()).item() * data.size(0)
@@ -253,7 +262,8 @@ class ModelHandler:
                     loss += self.criterion(output, target.reshape(output.shape).float()).item() * data.size(0)
                 if self.evaluate_metric is not None:
                     metric += self.evaluate_metric(output, target.reshape(output.shape).float()).item()
-
+        if cache_output:
+            self.cache[cache_output] = np.concatenate(outall)
         loss /= len(dataloader.dataset)
         if self.evaluate_metric is not None:
             metric /= len(dataloader.dataset)
@@ -270,13 +280,13 @@ class ModelHandler:
             self.logger.info(f'{self.evaluate_metric.__name__}: {metric}')
         return loss, metric
 
-    def test_model(self):
+    def test_model(self, cache_output=False):
         """ Test model on test set """
         print('Testing mode')
         print('-' * 10)
         if self.predict_only:
             raise ValueError('Cannot test model when predict_only is True')
-        loss, metric = self._evaluate(self.test_loader)
+        loss, metric = self._evaluate(self.test_loader, cache_output)
 
         self.logger.info(f'Test set: Average loss: {loss:.4f}')
         if self.evaluate_metric is not None:
@@ -307,7 +317,8 @@ class ModelHandler:
             if self.evaluate_metric is not None:
                 self.running_record['train'][self.evaluate_metric.__name__].append(metric_train)
                 self.running_record['val'][self.evaluate_metric.__name__].append(metric_val)
-
+        with open(os.path.join(self.save_dir, 'running_record.pkl'), 'wb') as f:
+            pickle.dump(self.running_record, f)
         return self.running_record
 
     def load_model(self, path):
