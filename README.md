@@ -85,7 +85,7 @@ Currently the model weights are:
 
 1. Folder "crack_segmentation" is used for predicting the pixels that belong to cracks, busbars, etc. using semantic segmentation.
 
-2. Folder "defective_detection" is used to do object detection of defective cells. 
+2. Folder "defect_detection" is used to do object detection of defective cells. 
 
 3. Folder "cell_classification" is used to do cell classification. 
 
@@ -98,11 +98,12 @@ The tutorials of using `PV-Vision` can be found in folder `tutorials`. The tutor
 We published one of our datasets as a benchmark for crack segmentation. Images and annotations can be found on [DuraMat datahub](https://datahub.duramat.org/dataset/crack-segmentation)
 
 ## Deploy models
-There are two ways to deply our deep learning models:
+There are three ways to deply our deep learning models:
 
 ### 1. Use Python
+Check tutorials of ``modelhandler.py``. This tool allows you to train your own deep learning models.
 ```
-Will update soon
+from pv_vision.nn import ModelHandler
 ```
 
 ### 2. Use Supervisely
@@ -144,7 +145,7 @@ Check if you successfully run the two dockers by running
 docker container ls
 ```
 
-After you have deployed the models, run our pipeline script to get the predictions.
+After you have deployed the models, run our pipeline script to get the predictions. **Note that this pipeline was only designed for object detection and doesn't have active maintenance currently** Check our tutorials about how to do crack analysis.
 
 ```bash
 bash pipeline.sh
@@ -222,7 +223,7 @@ PV-pipeline
 ## To do
 1. ~~We will upload some EL images for users to practice after we get approval from our data provider.~~ **Done**
 2. ~~We will improve the user experience of our tools. We will do more Object-oriented programming (OOP) in the future version.~~ **Done**
-3. ~~We also developed algoritms of extracting cracks from solar cells.~~ We will integrate the algorithms with `PV-Vision`.
+3. ~~We also developed algoritms of extracting cracks from solar cells. We will integrate the algorithms with `PV-Vision`.~~ **Done**
 4. ~~We want to predict the worst degradation amount based on the existing crack pattern. This will also be integrated into `PV-Vision`.~~ **Done**
-5. Add neural network modules
-6. Add result analysis
+5. ~~Add neural network modules~~ **Done**
+6. ~~Add result analysis~~ **Done**
