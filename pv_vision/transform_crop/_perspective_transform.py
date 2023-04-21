@@ -104,7 +104,7 @@ def has_mask(mask_name, path=None, data=None):
 
 
 def load_mask(path, image, mask_name='module_unet', center=True):
-    """Load the image of mask
+    """Load the image of mask. This works with Supervisely annotation json file.
 
     Parameters
     ----------

@@ -1,5 +1,5 @@
-import pv_vision.transform_crop.perspective_transform as transform
-import pv_vision.transform_crop.cell_crop as seg
+import pv_vision.transform_crop._perspective_transform as transform
+import pv_vision.transform_crop._cell_crop as seg
 import numpy as np
 import cv2 as cv
 from pathlib import Path

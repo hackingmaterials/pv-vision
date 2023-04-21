@@ -1,5 +1,5 @@
 import numpy as np
-import pv_vision.transform_crop.perspective_transform as transform
+import pv_vision.transform_crop._perspective_transform as transform
 from skimage.morphology import skeletonize
 from pathlib import Path
 import os
@@ -232,3 +232,33 @@ def detect_inactive(mask_crack, mask_busbar, extend_kernel=(10, 100)):
 
     return inactive_area, inactive_prop
 
+
+def crack_length(mask_crack):
+    """ compute the length of crack
+    """
+    ske_crack = skeleton_crack(mask_crack)
+    return ske_crack.sum()
+
+
+def avg_grayscale(raw_image, norm=255):
+    """ average brightness of the raw image
+    """
+    return (raw_image/norm).sum() / (raw_image.shape[0] * raw_image.shape[1])
+
+
+def avg_grayscale2(raw_img, inactive_area, norm=255):
+    """Average grayscale of inactive area, treat unisolated area as white
+    If my isolate area is small but grayscale of that area is severe, the metric value is not bad.
+    Because the white pixels around the small severe part compensate for it.
+    """
+    raw_inactive = raw_img/norm * inactive_area + (1 - inactive_area)
+    return raw_inactive.sum()/(raw_inactive.shape[0] * raw_inactive.shape[1])
+
+
+def avg_grayscale3(raw_img, inactive_area, norm=255):
+    """Average grayscale of inactive area ONLY. For intact cell, the metric is just 1
+    If my isolate area is small but grayscale of that area is severe, the metric value is also severe
+    """
+    raw_inactive = raw_img / norm * inactive_area
+    area = inactive_area.sum()
+    return raw_inactive.sum() / area if area else 1
