@@ -14,6 +14,10 @@ Here are some tutorials of using the packages, including
 
 6. Extract the features of the cracks from the solar cells
 
+We suggest learning `PV-Vision` following the order below;
+1. Learn preprocessing: `transform_*.ipynb`
+2. Learn model training and testing: `modelhandler_*.ipynb`
+3. Learn crack feature extraction: `extract_crack_features.ipynb`
 
 :warning: Note that we are updating our tools actively, so some tutorials may be out of date. We label them as "old_xxx.ipynb" which means they are not tested using the latest `pv-vision` tool. 
 
