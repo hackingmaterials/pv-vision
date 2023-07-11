@@ -8,8 +8,26 @@ from scipy.stats import mode
 
 
 class CrackCell:
-    """extract crack features from cell images"""
     def __init__(self, img_path, ann_path, crack_inx, busbar_inx, busbar_num):
+        """extract crack features from cell images.
+
+        Args:
+        ------
+        img_path: str
+            path to the raw image
+
+        ann_path: str
+            path to the annotation image
+        
+        crack_inx: int
+            index value of crack in the annotation image
+
+        busbar_inx: int
+            index value of busbar in the annotation image
+
+        busbar_num: int
+            number of busbars in the cell
+        """
         self.img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
         self.masks = cv.imread(ann_path, cv.IMREAD_GRAYSCALE)
         self.crack = (self.masks == crack_inx).astype(np.uint8)
