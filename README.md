@@ -50,7 +50,10 @@ Automatic crack segmentation and feature extraction:
   year={2023},
   publisher={IEEE}
 }
+```
 
+**We also published our data set:**
+```
 # Crack segmentation dataset
 @misc{chen2022benchmark,
   title={A Benchmark for Crack Segmentation in Electroluminescence Images},
@@ -61,7 +64,7 @@ Automatic crack segmentation and feature extraction:
 }
 ```
 
-**Please cite PV-Vision:**
+**If you want to cite the PV-Vision:**
 ```
 @misc{PV-Vision,
   doi={10.5281/ZENODO.6564508},
