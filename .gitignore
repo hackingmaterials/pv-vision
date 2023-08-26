@@ -16,4 +16,5 @@ tutorials/unet_oversample_low_final_model_for_paper
 tutorials/model_weights.zip
 tutorials/checkpoints
 tutorials/output
-
+tutorials/crack_segmentation
+tutorials/image_masks.zip

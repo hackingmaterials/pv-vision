@@ -35,6 +35,7 @@ class ModelHandler:
                  optimizer=None,
                  device=None,
                  evaluate_metric=None,
+                 log_interval=10,
                  save_dir='checkpoints',
                  save_name='model.pt'
                  ) -> None:
@@ -85,6 +86,9 @@ class ModelHandler:
 
         device: torch.device
         Device to use for training. Default is None.
+
+        log_interval: int
+        Number of batches to wait before logging training status. Default is 10.
 
         save_dir: str
         Directory to save the model. Default is 'checkpoints'.
@@ -160,7 +164,7 @@ class ModelHandler:
         os.makedirs(self.save_dir, exist_ok=True)
         self.save_name = save_name
 
-        self.log_interval = 10
+        self.log_interval = log_interval
         self._setup_logging()
         self.cache = {}
 
