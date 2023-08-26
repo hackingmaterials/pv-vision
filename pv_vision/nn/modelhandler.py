@@ -301,7 +301,7 @@ class ModelHandler:
             print(f'{self.evaluate_metric.__name__}: {metric}')
         return loss, metric
 
-    def train_model(self):
+    def train_model(self, print_memory=False):
         """ Train and evaluate model """
         if self.predict_only:
             raise ValueError('Cannot train model when predict_only is True')
@@ -315,6 +315,20 @@ class ModelHandler:
             print(f'Loss: {loss_train:.4f} (train) | {loss_val:.4f} (val)')
             if self.evaluate_metric is not None:
                 print(f'{self.evaluate_metric.__name__}: {metric_train:.4f} (train) | {metric_val:.4f} (val)')
+
+            if print_memory:
+                # if not use cuda, this will not work
+                if self.device.type == 'cuda':
+                    total_memory = torch.cuda.get_device_properties(self.device).total_memory / 1024**2 # in MB
+                    allocated_memory = torch.cuda.memory_allocated(self.device) / 1024**2 # in MB
+                    reserved_memory = torch.cuda.memory_reserved(self.device) / 1024**2 # in MB
+                    free_memory = total_memory - reserved_memory
+                    print(f'Total memory: {total_memory:.2f} MB')
+                    print(f'Allocated memory: {allocated_memory:.2f} MB')
+                    print(f'Reserved memory: {reserved_memory:.2f} MB')
+                    print(f'Free memory: {free_memory:.2f} MB')
+                else:
+                    print('Not using GPU')
 
             self.running_record['train']['loss'].append(loss_train)
             self.running_record['val']['loss'].append(loss_val)
