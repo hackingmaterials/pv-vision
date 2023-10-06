@@ -1,5 +1,5 @@
- # PV-Vision
 
+# <img alt="pv-vision" src="pv-vision.jpg" width="250">
 [![GitHub license](https://img.shields.io/github/license/hackingmaterials/pv-vision)](https://github.com/hackingmaterials/pv-vision/blob/main/LICENSE)
 [![Requires Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg?label=Requires%20Python)](https://python.org/downloads)
 [![PyPI](https://img.shields.io/pypi/v/pv-vision)](https://pypi.org/project/pv-vision/)
