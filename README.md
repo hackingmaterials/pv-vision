@@ -25,9 +25,10 @@ pip install pv-vision
 3. To enable CUDA and GPU acceleration, install [Pytorch with cudatoolkit](https://pytorch.org/get-started/locally/)
 
 ## Citation
-**Please cite our papers:**
 
-Automatic defect identification pipeline:
+PV-Vision package covers several topics in solar cell image analysis and is still under expansion. We published several papers related to various topics in this package. Please cite our papers accordingly.
+
+If your work is about automatic defect identification, please cite the following paper:
 ```
 @article{chen2022automated,
   title={Automated defect identification in electroluminescence images of solar modules},
@@ -40,7 +41,7 @@ Automatic defect identification pipeline:
 }
 ``` 
 
-Automatic crack segmentation and feature extraction:
+If your work is about automatic crack segmentation and feature extraction, please cite the following paper:
 ```
 # Crack segmentation paper
 @article{chen2023automatic,
@@ -52,7 +53,7 @@ Automatic crack segmentation and feature extraction:
 }
 ```
 
-**We also published our data set:**
+We also published our data set as a benchmark for crack segmentation. If you use our data set, please cite the following one:
 ```
 # Crack segmentation dataset
 @misc{chen2022benchmark,
@@ -64,7 +65,7 @@ Automatic crack segmentation and feature extraction:
 }
 ```
 
-**If you want to cite the PV-Vision:**
+In general, if you want to cite the PV-Vision package or this repository, please use the following BibTex:
 ```
 @misc{PV-Vision,
   doi={10.5281/ZENODO.6564508},
@@ -74,6 +75,14 @@ Automatic crack segmentation and feature extraction:
   year={2022},
   copyright={Open Access}
 }
+```
+Examples of citing our works in latex can be:
+```
+To enable the automatic analysis of EL images, an open-source package PV-VISION~\cite{PV-Vision} was developed.
+
+Individual defects were located and classified using object detection model in a previous work~\cite{chen2022automated}.
+
+Cracks were segmented using a semantic segmentation model and crack features such as isolated area or length were automatically extracted in a previous work~\cite{chen2023automatic}. The corresponding dataset was publisehd as a benchmark~\cite{chen2022benchmark}.
 ```
 
 ## Overview
@@ -103,7 +112,7 @@ We published one of our datasets as a benchmark for crack segmentation. Images a
 ## Deploy models
 There are three ways to deply our deep learning models:
 
-### 1. Use Python
+### 1. Use Python (Recommended)
 Check tutorials of ``modelhandler.py``. This tool allows you to train your own deep learning models.
 ```
 from pv_vision.nn import ModelHandler
@@ -114,6 +123,8 @@ from pv_vision.nn import ModelHandler
 Upload the model weights to [Supervisely](https://supervise.ly/) and make predictions on this website. The detailed tutorials can be found [here](https://docs.supervise.ly/) and [here](https://github.com/supervisely/supervisely/blob/master/help/tutorials/04_deploy_neural_net_as_api/deploy-model.md#method-1-through-ui).
 
 ### 3. Use docker
+:warning: **This method may be out of date.**
+
 You can also run the models using `docker`. 
 
 First make sure you prepare required files as stated in the following folder structure.
