@@ -341,7 +341,9 @@ class ModelHandler:
 
     def load_model(self, path):
         """ Load model from path """
-        self.model.load_state_dict(torch.load(path))
+        self.model.load_state_dict(
+            torch.load(path, map_location=self.device)
+        )
         self.model.to(self.device)
         self.logger.info(f'Loaded model from {path}')
 
