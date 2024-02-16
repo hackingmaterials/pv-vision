@@ -11,7 +11,7 @@
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
 
 ## Installation
-1. Install from source
+1. Install from source (Recommended for the current beta version)
 ```bash
 git clone https://github.com/hackingmaterials/pv-vision.git
 cd pv-vision
