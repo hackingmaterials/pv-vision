@@ -10,6 +10,8 @@
 
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
 
+Currently the repo is maintained by one person only, so everyone is welcome to pull and push requests. Thank you for your contribution for making this tool better. 
+
 ## Installation
 1. Install from source (Recommended for the current beta version)
 ```bash
