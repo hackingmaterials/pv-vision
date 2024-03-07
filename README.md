@@ -12,6 +12,8 @@
 
 Currently the repo is maintained by one person only, so everyone is welcome to pull and push requests. Thank you for your contribution for making this tool better. 
 
+A toy system about how to serve the crack segmentation model can be found [here](https://github.com/X-Chen97/crack_segmenter).
+
 ## Installation
 1. Install from source (Recommended for the current beta version)
 ```bash
