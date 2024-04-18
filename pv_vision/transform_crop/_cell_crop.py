@@ -696,19 +696,23 @@ def perspective_transform(image, src, size):
     src: array
     Sorted coordinates of corners. [top-left, top-right, bottom-left, bottom-right]
 
-    size: int
-    Size of cropped solar cell, e.g., to output 32x32 cells, input 32.
+    size: tuple / int
+    Size of cropped solar cell,
+    if tuple, (width, height) of the cell
+    if int, use it for both height and width. e.g., to output 32x32 cells, input 32.
 
     Returns
     -------
     warped: array
     Transformed solar cell image
     """
+    if isinstance(size, int):
+        size = (size, size)
     src = np.float32(src)
-    dst = np.float32([(0, 0), (size, 0), (0, size), (size, size)])
+    dst = np.float32([(0, 0), (size[0], 0), (0, size[1]), (size[0], size[1])])
     M = cv.getPerspectiveTransform(src, dst)
 
-    warped = cv.warpPerspective(image, M, (size, size))
+    warped = cv.warpPerspective(image, M, size)
 
     return warped
 
@@ -725,7 +729,7 @@ def segment_cell(image, hline_abs_couple, vline_abs_couple, cellsize,
     hline_abs_couple, vline_abs_couple,: array
     Couple of horizontal edges, vertical edges
 
-    cellsize: int
+    cellsize: tuple/int
     Size of cropped solar cell, e.g., to output 32x32 cells, input 32.
 
     save_path: str or pathlib.PosixPath

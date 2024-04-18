@@ -192,8 +192,9 @@ class SplitModule(AbstractModule):
 
         Parameters
         ----------
-        cellsize: int
+        cellsize: tuple / int
         Edge size of a cell. This can be an estimated value from raw module image.
+        If tuple, it should be (width, height). If int, it will be used for both width and height.
 
         hsplit, vplit: int
         Number of horizontal/vertical splits
@@ -211,14 +212,16 @@ class SplitModule(AbstractModule):
         -------
         cells: array
         """
+        if isinstance(cellsize, int):
+            cellsize = (cellsize, cellsize)
 
         image_thre = transform.image_threshold(self.image, adaptive=True)
         image_thre = cv.resize(image_thre, (4000, 2500))
-        self._vline_abs = seg.detect_vertical_lines(image_thre, cell_size=cellsize,
+        self._vline_abs = seg.detect_vertical_lines(image_thre, cell_size=cellsize[0],
                                                     column=self.col, thre=hthre, split=hsplit, peak_interval=vinterval,
                                                     margin=vmargin)
         self._hline_abs = seg.detect_horizon_lines(image_thre, row=self.row, busbar=self.busbar,
-                                                   cell_size=cellsize, thre=vthre, split=vsplit,
+                                                   cell_size=cellsize[1], thre=vthre, split=vsplit,
                                                    peak_interval=hinterval, margin=hmargin)
 
         self._cells = seg.segment_cell(self.image, self._hline_abs, self._vline_abs, cellsize, savepath, displace)
@@ -385,8 +388,10 @@ class MaskModule(AbstractModule):
         width, height: int
         Width/height of transformed image
 
-        cellsize: int
-        Edge length of a cell
+        cellsize: tuple / int
+        If tuple, (width, height) of a cell.
+        If int, it will be used for both width and height.
+
 
         auto_rotate: bool
         If true, automatically adjust module orientation such that shorter side is vertically aligned.
@@ -405,9 +410,11 @@ class MaskModule(AbstractModule):
             return None
             # self._corners = self.corner_detection_cont(mode=1)
 
-        if cellsize:
-            width = self.col * cellsize
-            height = self.row * cellsize
+        if isinstance(cellsize, int):
+            cellsize = (cellsize, cellsize)
+
+        width = self.col * cellsize[0]
+        height = self.row * cellsize[1]
         wrap = transform.perspective_transform(self._image, self._corners, width, height, rotate=auto_rotate)
         self._transformed = TransformedModule(wrap, self._row, self._col, self._busbar)
         if img_only:
@@ -494,6 +501,11 @@ class TransformedModule(AbstractModule):
 
     def _detect_inner_edges(self, cellsize, vl_interval, vl_thre, vl_split_size, vl_margin,
                             hl_interval, hl_thre, hl_split_size, hl_margin, simple=False):
+        """Detect inner edges of the solar module"""
+
+        if isinstance(cellsize, int):
+            cellsize = (cellsize, cellsize)
+
 
         if simple:
             vline_abs = list(zip(np.zeros(self.col - 1),
@@ -501,11 +513,11 @@ class TransformedModule(AbstractModule):
             hline_abs = list(zip(np.zeros(self.row - 1),
                                  np.linspace(0, self.size[0], self.row + 1)[1: -1].astype(int)))
         else:
-            vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+            vinx_split, vline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize[0],
                                                       busbar=self.busbar, peaks_on=0, split_size=vl_split_size,
                                                       peak_interval=vl_interval, thre=vl_thre, margin=vl_margin)
             vline_abs = seg.linear_regression(vinx_split, vline_split)
-            hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize,
+            hinx_split, hline_split = seg.detect_edge(self._image, row_col=[self.row, self.col], cell_size=cellsize[1],
                                                       busbar=self.busbar, peaks_on=1, split_size=hl_split_size,
                                                       peak_interval=hl_interval, thre=hl_thre, margin=hl_margin)
             hline_abs = seg.linear_regression(hinx_split, hline_split)
