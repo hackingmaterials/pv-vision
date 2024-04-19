@@ -185,19 +185,19 @@ def split_img(image, n_split=None, split_size=None, direction=0):
 
     dimension = image.shape[direction]
     if split_size and (n_split is None):
-        n_split = int(dimension / split_size)
+        n_split = int(dimension / split_size)#dimension // split_size #
     elif (split_size is None) and (n_split is None):
         raise ValueError("Either split or split_size should be provided.")
 
     end = int(dimension / n_split)
     if direction == 0:
         splits = np.vsplit(image[: end * n_split, :], n_split)
-        if end * n_split < dimension:
-            splits.append(image[end * n_split:, :])
+        # if end * n_split < dimension:
+        #     splits.append(image[end * n_split:, :])
     elif direction == 1:
         splits = np.hsplit(image[:, :end * n_split], n_split)
-        if end * n_split < dimension:
-            splits.append(image[:, end * n_split:])
+        # if end * n_split < dimension:
+        #     splits.append(image[:, end * n_split:])
 
     return splits
 
@@ -555,7 +555,7 @@ def detect_edge(image, row_col, busbar, peaks_on=0, split_size=10, thre=0.9,
 
     flag = False
     for inx, split in enumerate(splits):
-        _, _, peaks_split = detect_peaks(split=split, direction=peaks_on, busbar=busbar,
+        _, _, peaks_split = detect_peaks(split=split, direction=peaks_on, busbar=busbar, thre=thre,
                                          cell_size=cell_size, interval=peak_interval, margin=margin)
 
         splits_inx.append(int(split_size * (inx + 1 / 2)))

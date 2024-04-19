@@ -1,3 +1,5 @@
+import os
+
 import pv_vision.transform_crop._perspective_transform as transform
 import pv_vision.transform_crop._cell_crop as seg
 import numpy as np
@@ -443,7 +445,7 @@ class MaskModule(AbstractModule):
     def plot_peaks(self, n_list, split_size, interval, thre, margin, direction=0):
         self._transformed.plot_peaks(n_list, split_size, interval, thre, margin, direction)
 
-    def crop_cell(self, cellsize, inner_edges_para=None, plot=False, simple=False):
+    def crop_cell(self, cellsize, inner_edges_para=None, plot=False, simple=False, savepath=None, module_name=None):
         if inner_edges_para is not None:
             for para in ["vl_interval", "vl_thre", "vl_split_size", "vl_margin",
                             "hl_interval", "hl_thre", "hl_split_size", "hl_margin"]:
@@ -452,6 +454,12 @@ class MaskModule(AbstractModule):
         cells = self._transformed.crop_cell(cellsize=cellsize,
                                             inner_edges_para=inner_edges_para,
                                             plot=plot, simple=simple)
+        if savepath:
+            if module_name is None:
+                raise ValueError("module_name is not provided")
+            os.makedirs(savepath, exist_ok=True)
+            for i, cell in enumerate(cells):
+                cv.imwrite(str(Path(savepath) / f"{module_name}_{i}.png"), cell)
 
         return cells
 
