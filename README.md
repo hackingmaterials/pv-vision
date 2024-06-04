@@ -15,13 +15,19 @@ Currently the repo is maintained by one person only, so everyone is welcome to p
 A toy system about how to serve the crack segmentation model can be found [here](https://github.com/X-Chen97/crack_segmenter).
 
 ## Installation
+0. create a virtual environment with conda
+```bash
+conda create -n pv-vision python=3.10
+conda activate pv-vision
+```
+
 1. Install from source (Recommended for the current beta version)
 ```bash
 git clone https://github.com/hackingmaterials/pv-vision.git
 cd pv-vision
 pip install .
 ```
-2. Install from Pypi
+2. Install from Pypi (alternative)
 ```bash
 pip install pv-vision
 ```
