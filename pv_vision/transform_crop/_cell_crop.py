@@ -127,7 +127,7 @@ def detectoutliers(data, rate=1.5, option=1):
             if outlier_list[i]:
                 outlier_list[i] = False
 
-        return (1 - outlier_list).astype(np.bool)
+        return (1 - outlier_list).astype(bool)
 
 
 def filter_margin(edges, im_length, margin=20):
@@ -299,7 +299,7 @@ def plot_peaks_three(n_list, image, busbar, n_split=None, split_size=None, direc
     plt.tight_layout()
 
 
-def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, peak_interval=None, margin=None):
+def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, n_split=100, peak_interval=None, margin=None):
     """ Detect vertical edges by segmenting image into horizontal splits. Note that the module
     is not perpective transformed yet.
 
@@ -318,7 +318,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
     Peak intensity above THRE will be set as 1.
     Note that the edge's peak intensity should be lowest because edges are black
 
-    split: int
+    n_split: int
     Number of splits
 
     peak_interval: int
@@ -334,7 +334,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
     # end = int(height / split)
     # image_hsplits = np.vsplit(image_thre[: end * split, :], split)  # horizontal splits
     # image_hsplits.append(image_thre[end * split:, :])
-    image_hsplits = split_img(image_thre, split=split, direction=0)
+    image_hsplits = split_img(image_thre, n_split=n_split, direction=0)
 
     edge_x = []
     inx_y = []
@@ -365,7 +365,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
 
             if len(peak_new_detect) == 1 + column:
                 edge_x.append(peak_new_detect)
-                inx_mean = ((2 * inx + 1) * (image_thre.shape[0] / split) - 1) / 2
+                inx_mean = ((2 * inx + 1) * (image_thre.shape[0] / n_split) - 1) / 2
                 inx_y.append(inx_mean)
     edge_x = np.array(edge_x)
 
@@ -393,7 +393,7 @@ def detect_vertical_lines(image_thre, column, cell_size, thre=0.8, split=100, pe
     return vline_abs_couple
 
 
-def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50, peak_interval=None, margin=None):
+def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, n_split=50, peak_interval=None, margin=None):
     """ Detect horizontal edges by segmenting image into vertical splits. Note that the module
     is not perpective transformed yet.
 
@@ -415,7 +415,7 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
     Peak intensity above THRE will be set as 1.
     Note that the edge's peak intensity should be lowest because edges are black
 
-    split: int
+    n_split: int
     Number of splits
 
     peak_interval: int
@@ -431,7 +431,7 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
     # end = int(width / split)
     # image_vsplits = np.hsplit(image_thre[:, :end * split], split)  # vertical splits
     # image_vsplits.append(image_thre[:, end * split:])
-    image_vsplits = split_img(image_thre, split=split, direction=1)
+    image_vsplits = split_img(image_thre, n_split=n_split, direction=1)
 
     edge_y = []
     inx_x = []
@@ -461,7 +461,7 @@ def detect_horizon_lines(image_thre, row, busbar, cell_size, thre=0.6, split=50,
 
             if len(peak_new_detect) == (busbar + 1) * row + 1:
                 edge_y.append(peak_new_detect)
-                inx_mean = ((2 * inx + 1) * (image_thre.shape[1] / split) - 1) / 2
+                inx_mean = ((2 * inx + 1) * (image_thre.shape[1] / n_split) - 1) / 2
                 inx_x.append(inx_mean)
 
     edge_y = np.array(edge_y)

@@ -220,10 +220,10 @@ class SplitModule(AbstractModule):
         image_thre = transform.image_threshold(self.image, adaptive=True)
         image_thre = cv.resize(image_thre, (4000, 2500))
         self._vline_abs = seg.detect_vertical_lines(image_thre, cell_size=cellsize[0],
-                                                    column=self.col, thre=hthre, split=hsplit, peak_interval=vinterval,
+                                                    column=self.col, thre=hthre, n_split=hsplit, peak_interval=vinterval,
                                                     margin=vmargin)
         self._hline_abs = seg.detect_horizon_lines(image_thre, row=self.row, busbar=self.busbar,
-                                                   cell_size=cellsize[1], thre=vthre, split=vsplit,
+                                                   cell_size=cellsize[1], thre=vthre, n_split=vsplit,
                                                    peak_interval=hinterval, margin=hmargin)
 
         self._cells = seg.segment_cell(self.image, self._hline_abs, self._vline_abs, cellsize, savepath, displace)

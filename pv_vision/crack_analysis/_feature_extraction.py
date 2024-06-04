@@ -62,7 +62,7 @@ def locate_busbar(ske_busbar):
     for i in np.linspace(10, ske_busbar.shape[-1] - 10, 10, dtype=int):
         numlist_busbar.append(len(np.argwhere(ske_busbar[:, i] == 1)))
 
-    num_busbar = stats.mode(numlist_busbar).mode[0]
+    num_busbar = stats.mode(numlist_busbar).mode
 
     pos_busbar = np.zeros((num_busbar, 1))
     for i in np.linspace(10, ske_busbar.shape[-1] - 10, 100, dtype=int):
