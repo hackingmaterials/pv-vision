@@ -6,6 +6,12 @@ images of PV module. The methods in this package include EL image preprocessing,
 cell identification, crack segmentation, maximum isolated area prediction, etc.
 
 ## Installation
+0. create a virtual environment with conda
+```bash
+conda create -n pv-vision python=3.10
+conda activate pv-vision
+```
+
 1. Install from source
 ```bash
 git clone https://github.com/hackingmaterials/pv-vision.git

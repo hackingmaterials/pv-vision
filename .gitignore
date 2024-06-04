@@ -10,6 +10,7 @@ output
 **/archive
 pv_vision.egg-info
 dist
+build
 
 # tutorial
 tutorials/unet_oversample_low_final_model_for_paper

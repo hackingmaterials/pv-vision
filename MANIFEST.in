@@ -1,1 +1,2 @@
 include long_description.md
+include requirements.txt

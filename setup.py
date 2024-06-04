@@ -4,6 +4,9 @@ from pv_vision import __version__
 with open("long_description.md", "r") as f:
     long_description = f.read()
 
+with open("requirements.txt", "r") as f:
+    requirements = f.read().splitlines()
+
 setup(
     name="pv_vision",
     version=__version__,
@@ -15,21 +18,8 @@ setup(
     url="https://github.com/hackingmaterials/pv-vision",
     packages=find_packages(),
     include_package_data=True,
-    python_requires='>=3.8',
-    install_requires=[
-        "matplotlib>=3.4.2",
-        "opencv_python>=4.4.0.44",
-        "seaborn>=0.11.2",
-        "torchvision>=0.7.0",
-        "pandas>=1.3.2",
-        "imutils>=0.5.3",
-        "scipy>=1.6.0",
-        "numpy>=1.19.2",
-        "tqdm>=4.56.0",
-        "torch>=1.6.0",
-        "Pillow>=9.0.1",
-        "scikit_learn>=0.24.2",
-    ],
+    python_requires='>=3.10',
+    install_requires=requirements,
     license="BSD",
     classifiers=[
         "Programming Language :: Python :: 3",
