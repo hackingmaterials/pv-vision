@@ -6,7 +6,7 @@
 [![DOI](https://zenodo.org/badge/253107508.svg)](https://zenodo.org/badge/latestdoi/253107508)
 
 
-**:warning: This is a beta version tool. It is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
+**:warning: PV-Vision is still under test for different operating environments. Please raise an issue if you cannot use it on your computer.**
 
 **:warning: We are updating our tools actively so some of the tutorials may be out of date.**
 
