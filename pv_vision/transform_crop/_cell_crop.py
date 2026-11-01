@@ -122,7 +122,8 @@ def detectoutliers(data, rate=1.5, option=1):
         return data
 
     if option == 1:
-        outlier_list = np.insert(outlier_list, 4, False)
+        # Clamp the insert position so short inputs (< 4 intervals) don't raise IndexError
+        outlier_list = np.insert(outlier_list, min(4, len(outlier_list)), False)
         for i in range(5, len(outlier_list) - 5):
             if outlier_list[i]:
                 outlier_list[i] = False
