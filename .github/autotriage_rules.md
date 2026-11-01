@@ -30,10 +30,15 @@ The rest of that file refines the mode, e.g. which kinds of PR may merge.
 ## Repository profile
 
 - Repository: hackingmaterials/pv-vision
-- Activity: not assessed yet. Escalations may wait a while, so make
+- Activity: low. Last human commits were in March 2026; most earlier
+  development was 2020-2024. Escalations may wait a while, so make
   summaries self-contained.
-- Related repositories: none listed yet.
-- AI policy: none listed yet.
+- Distribution: published on PyPI as `pv-vision`; tutorials in `tutorials/`
+  and `examples/` are what most users follow.
+- Related repositories: none upstream. Trained model weights are hosted
+  outside the repo; their download links live in
+  `data/neural-network-weights.txt` and the README.
+- AI policy: none.
 
 ## Maintainers
 
@@ -42,8 +47,8 @@ Do not infer maintainer status from GitHub author association: COLLABORATOR
 includes read-only users, and MEMBER includes anyone in the organization.
 
 - Default escalation: @lbj2011
-- Additional escalation: none listed yet. Tag the default maintainer for
-  anything serious, large, or touching many parts of the code.
+- Additional escalation: none. Tag the default maintainer for anything
+  serious, large, or touching many parts of the code.
 - Area owners. For changes in their area, tag them instead of the default.
   Prefer this list over CODEOWNERS, which may be stale.
   - None listed yet; tag the default maintainer.
@@ -54,8 +59,19 @@ includes read-only users, and MEMBER includes anyone in the organization.
 
 Any change to these is escalated (rule 1) in every mode, however small.
 
-- None listed yet. Until some are, treat any change to formulas, constants,
-  units, default parameters, or data files as a domain risk area.
+- `pv_vision/transform_crop/`: module corner detection, perspective
+  transform and cell cropping. Thresholds, split sizes, margins and default
+  module layouts (rows, columns, busbars) change which cells users get.
+- `pv_vision/nn/models.py`: network architectures. They must stay compatible
+  with the released trained weights.
+- `pv_vision/nn/modelhandler.py`: training and inference defaults (loss,
+  optimizer, transforms, normalization).
+- `pv_vision/defect_detection/` and `pv_vision/cell_classification/`: class
+  label mappings, inference thresholds and result post-processing.
+- `pv_vision/crack_analysis/`: crack length, inactive-area and brightness
+  features, which feed published analyses.
+- `data/`: weight download links and reference data.
+- Any change to formulas, constants, units, or default parameters elsewhere.
 
 ## Contribution requirements
 
@@ -265,7 +281,7 @@ of this evidence the PR has, and whatever it lacks, in your summary.
   Values that users or trained models already depend on should get a new name,
   not new numbers under the old one.
 - **Downstream impact:** whether the repo's dependents produce different
-  results or break. Known dependents: none listed yet.
+  results or break. Known dependents: users of the PyPI package `pv-vision` and the notebooks in `tutorials/` and `examples/`.
 - **Upstream bugs:** if the root cause is in a dependency, say so and suggest
   fixing it there rather than working around it.
 - **Authority:** decisions about domain behavior belong to the area owner.
