@@ -83,3 +83,20 @@ def test_coordinate2inx_row_major_order():
     assert cc.coordinate2inx([0, 0]) == 0
     assert cc.coordinate2inx([37.5, 0]) == 1
     assert cc.coordinate2inx([0, 37.5]) == 16
+
+
+@pytest.mark.parametrize("n", [1, 2, 3])
+def test_detectoutliers_option1_handles_short_input(n):
+    # Regression for issue #16: fewer than 4 peak intervals raised IndexError.
+    data = np.arange(1, n + 1, dtype=float) * 100
+    mask = cc.detectoutliers(data, option=1)
+    assert mask.dtype == bool
+    assert len(mask) == n + 1
+
+
+def test_detectoutliers_option1_unchanged_for_long_input():
+    data = np.array([100.0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 300])
+    mask = cc.detectoutliers(data, option=1)
+    assert len(mask) == len(data) + 1
+    assert not mask[-1]
+    assert mask[:-1].all()
